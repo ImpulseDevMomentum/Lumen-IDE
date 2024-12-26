@@ -91,8 +91,8 @@ THEMES = {
 }
 
 KEYWORDS = [
-    "SET", "ELSE", "PRINT", "IF", "THEN", "OTHER", "END", "FOR", "TO", "STEP", "NEXT",
-    "WHILE", "DO", "INPUT", "INPUT_INT", "AND", "OR", "NOT", "FUNCTION", "RETURN"
+    "SET", "ELSE", "PRINT", "IF", "THEN", "OTHER", "STOP", "FOR", "TO", "STEP", "NEXT",
+    "WHILE", "DO", "INPUT", "INPUT_INT", "AND", "OR", "NOT", "FUNCTION", "BACK"
 ]
 
 class SyntaxHighlighter:
