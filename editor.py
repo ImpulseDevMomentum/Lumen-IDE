@@ -42,11 +42,56 @@ THEMES = {
             "comments": "#a0a1a7",
             "operators": "#0184bc",
         }
+    },
+    "purple_haze": {
+        "bg": "#2e1a47",
+        "fg": "#d1bfe2",
+        "selected_bg": "#4a2975",
+        "selected_fg": "#e3d0f3",
+        "console_bg": "#27163a",
+        "console_fg": "#b39dd8",
+        "syntax_colors": {
+            "keywords": "#b084cc",    
+            "strings": "#d5a6e0",     
+            "numbers": "#c89ee5",     
+            "comments": "#6e4b81",    
+            "operators": "#a75f9b",
+        }
+    },
+    "lavender_dream": {
+        "bg": "#352c61",
+        "fg": "#c9b1e1",
+        "selected_bg": "#5a478a",
+        "selected_fg": "#e4d4f7",
+        "console_bg": "#2a2149",
+        "console_fg": "#9b87cc",
+        "syntax_colors": {
+            "keywords": "#8c72b9",    
+            "strings": "#b78dcb",     
+            "numbers": "#aa80c6",     
+            "comments": "#5d4a82",    
+            "operators": "#7d6cbb",
+        }
+    },
+    "violet_twilight": {
+        "bg": "#251a40",
+        "fg": "#b197cf",
+        "selected_bg": "#42306d",
+        "selected_fg": "#d6c1e8",
+        "console_bg": "#1f1433",
+        "console_fg": "#9f82bc",
+        "syntax_colors": {
+            "keywords": "#875eb0",    
+            "strings": "#aa71c8",     
+            "numbers": "#9257b1",     
+            "comments": "#6c4a92",    
+            "operators": "#7a5da5",
+        }
     }
 }
 
 KEYWORDS = [
-    "SET", "PRINT", "IF", "THEN", "OTHER", "END", "FOR", "TO", "STEP", "NEXT",
+    "SET", "ELSE", "PRINT", "IF", "THEN", "OTHER", "END", "FOR", "TO", "STEP", "NEXT",
     "WHILE", "DO", "INPUT", "INPUT_INT", "AND", "OR", "NOT", "FUNCTION", "RETURN"
 ]
 
@@ -176,7 +221,7 @@ class LumenEditor:
         
         ttk.Label(self.toolbar, text="Theme:").pack(side=tk.LEFT, padx=5)
         self.theme_var = tk.StringVar(value=self.settings["theme"])
-        theme_combo = ttk.Combobox(self.toolbar, textvariable=self.theme_var, values=["dark", "light"], width=10)
+        theme_combo = ttk.Combobox(self.toolbar, textvariable=self.theme_var, values=["dark", "light", "purple_haze", "lavender_dream", "violet_twilight"], width=10)
         theme_combo.pack(side=tk.LEFT, padx=5)
         theme_combo.bind('<<ComboboxSelected>>', self.change_theme)
         
