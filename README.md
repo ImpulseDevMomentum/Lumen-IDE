@@ -3,7 +3,26 @@ Special IDE created only for coding with `Lumen`
 This "language" was "created" for school purposes. Because of that, it is very, very simple, so please don't try to code next Cyberpunk. 
 It was based on this tutorial: https://www.youtube.com/watch?v=Eythq9848Fg&list=PLZQftyCk7_SdoVexSmwy_tBgs7P0b97yD&index by CodePulse.
 
-> Here are some syntax differences:
+> You have two versions of the editor: **editor.py** and **editorbeta.py**. 
+> Below are the differences between the two.
+> You will most likely want to use the stable editor.py version.
+
+> editor.py
+- Works (most of the time)
+- Tested (I can't guarantee)
+- "Stable" versions
+
+> editorbeta.py
+- Doesn't work (most of the time)
+- Not tested (I can't guarantee)
+- **Absolutely** not stable versions
+- More features (Probably)
+- Actively updated (I can't guarantee)
+
+> **Note**: editor.py is the more reliable and stable version, whereas editorbeta.py 
+> includes experimental features that might not work consistently and is subject to frequent changes.
+
+> and some syntax differences! (in Lumen):
 
 - instead of `ELIF` you have `OTHER` <br>
 - instead of `RETURN` you have `BACK` <br>
