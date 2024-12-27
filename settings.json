@@ -1,1 +1,13 @@
-{"theme": "dark", "font_size": 12, "font_family": "Consolas", "VERSION_LANG": "1.0.2"}
+{
+  "theme": "dark",
+  "font_size": 16,
+  "font_family": "Consolas",
+  "VERSION_LANG": "1.0.2",
+  "tab_size": 2,
+  "word_wrap": "off",
+  "highlight_active_line": true,
+  "cursor_style": "ace",
+  "auto_complete": true,
+  "auto_pairs": true,
+  "suggestions": false
+}
