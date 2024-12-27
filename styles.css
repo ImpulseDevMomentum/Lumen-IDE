@@ -113,9 +113,11 @@ button:active {
     padding: 4px 8px;
     display: flex;
     border-bottom: 1px solid #181a1f;
+    -webkit-app-region: drag;
 }
 
 .menu-item {
+    -webkit-app-region: no-drag;
     color: #abb2bf;
     padding: 4px 8px;
     cursor: pointer;
@@ -135,14 +137,16 @@ button:active {
     border: 1px solid #181a1f;
     min-width: 180px;
     z-index: 1000;
+    padding: 4px 0;
 }
 
 .dropdown-item {
     display: flex;
     align-items: center;
-    padding: 8px 12px;
+    padding: 6px 12px;
     color: #abb2bf;
     cursor: pointer;
+    min-width: 250px;
 }
 
 .dropdown-item:hover {
@@ -208,16 +212,28 @@ button:active {
 }
 
 .dropdown-item select {
-    margin-left: 10px;
-    width: 120px;
-    z-index: 1001;
-    position: relative;
+    width: 100px;
+    background-color: #2d2d2d;
+    color: #fff;
+    border: 1px solid #3d3d3d;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin-left: auto;
+}
+
+.dropdown-item select:hover {
+    background-color: #353535;
+}
+
+.dropdown-item select:focus {
+    outline: none;
+    border-color: #528bff;
 }
 
 .dropdown-item i {
-    vertical-align: middle;
+    color: #6495ED;
     margin-right: 8px;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .dropdown-item, .menu-item {
@@ -259,4 +275,17 @@ button:active {
     flex: 1;
     outline: none;
     padding: 0;
+}
+
+.dropdown-item-text {
+    margin-right: auto;
+    color: #abb2bf;
+}
+
+.dropdown-item i.material-icons {
+    color: #6495ED;
+}
+
+#ideMenu .dropdown-item i.material-icons {
+    color: #98c379;
 }
