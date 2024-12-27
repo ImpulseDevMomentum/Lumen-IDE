@@ -7,17 +7,7 @@ It was based on this tutorial: https://www.youtube.com/watch?v=Eythq9848Fg&list=
 > Below are the differences between the two.
 > You will most likely want to use the stable editor.py version.
 
-> editor.py
-- Works (most of the time)
-- Tested (I can't guarantee)
-- "Stable" versions
-
-> editorbeta.py
-- Doesn't work (most of the time)
-- Not tested (I can't guarantee)
-- **Absolutely** not stable versions
-- More features (Probably)
-- Actively updated (I can't guarantee)
+> Sadly I couldn't attach/upload node_modules files
 
 > **Note**: editor.py is the more reliable and stable version, whereas editorbeta.py 
 > includes experimental features that might not work consistently and is subject to frequent changes.
