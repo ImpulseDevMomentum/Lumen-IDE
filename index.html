@@ -10,11 +10,17 @@
         <div class="menu-item" onclick="toggleDropdown('fileMenu')">
             File
             <div class="dropdown" id="fileMenu">
+                <div class="dropdown-item" onclick="newFile()">
+                    <i class="material-icons">note_add</i> New (Ctrl+N)
+                </div>
                 <div class="dropdown-item" onclick="openFile()">
                     <i class="material-icons">folder_open</i> Open (Ctrl+O)
                 </div>
                 <div class="dropdown-item" onclick="saveFile()">
                     <i class="material-icons">save</i> Save (Ctrl+S)
+                </div>
+                <div class="dropdown-item" onclick="saveFileAs()">
+                    <i class="material-icons">save_as</i> Save As (Ctrl+Shift+S)
                 </div>
                 <div class="dropdown-divider"></div>
                 <div class="dropdown-item" onclick="runCode()">
@@ -25,18 +31,25 @@
                 </div>
                 <div class="dropdown-divider"></div>
                 <div class="dropdown-item" onclick="window.close()">
-                    <i class="material-icons">exit_to_app</i> Exit
+                    <i class="material-icons">exit_to_app</i> Exit (Alt+F4)
                 </div>
             </div>
         </div>
         <div class="menu-item" onclick="toggleDropdown('viewMenu')">
             View
             <div class="dropdown" id="viewMenu">
+                <div class="dropdown-item" onclick="toggleConsole()">
+                    <i class="material-icons">terminal</i> Toggle Console (Ctrl+J)
+                </div>
+                <div class="dropdown-divider"></div>
                 <div class="dropdown-item">
-                    <i class="material-icons">palette</i> Theme
+                    <i class="material-icons">palette</i>
+                    <span class="dropdown-item-text">Theme</span>
                     <select id="themeSelect">
                         <option value="dark">Dark</option>
                         <option value="light">Light</option>
+                        <option value="github_dark">Github Dark</option>
+                        <option value="midnight">Midnight</option>
                         <option value="purple_haze">Purple Haze</option>
                         <option value="lavender_dream">Lavender Dream</option>
                         <option value="violet_twilight">Violet Twilight</option>
@@ -50,6 +63,89 @@
                         <option value="16">16px</option>
                         <option value="18">18px</option>
                         <option value="20">20px</option>
+                    </select>
+                </div>
+                <div class="dropdown-item">
+                    <i class="material-icons">font_download</i> Font Family
+                    <select id="fontFamilySelect">
+                        <option value="Consolas">Consolas</option>
+                        <option value="Monaco">Monaco</option>
+                        <option value="Fira Code">Fira Code</option>
+                        <option value="Source Code Pro">Source Code Pro</option>
+                        <option value="JetBrains Mono">JetBrains Mono</option>
+                        <option value="Courier New">Courier New</option>
+                    </select>
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item">
+                    <i class="material-icons">space_bar</i> Tab Size
+                    <select id="tabSizeSelect">
+                        <option value="2">2 spaces</option>
+                        <option value="4">4 spaces</option>
+                        <option value="8">8 spaces</option>
+                    </select>
+                </div>
+                <div class="dropdown-item">
+                    <i class="material-icons">wrap_text</i> Word Wrap
+                    <select id="wordWrapSelect">
+                        <option value="off">Off</option>
+                        <option value="40">40 chars</option>
+                        <option value="80">80 chars</option>
+                        <option value="120">120 chars</option>
+                    </select>
+                </div>
+                <div class="dropdown-item">
+                    <i class="material-icons">format_line_spacing</i> Line Height
+                    <select id="lineHeightSelect">
+                        <option value="1">Single</option>
+                        <option value="1.2">Comfortable</option>
+                        <option value="1.5">Relaxed</option>
+                        <option value="2">Double</option>
+                    </select>
+                </div>
+                <div class="dropdown-item">
+                    <i class="material-icons">border_color</i> Cursor Style
+                    <select id="cursorStyleSelect">
+                        <option value="ace">Line</option>
+                        <option value="slim">Slim</option>
+                        <option value="wide">Block</option>
+                        <option value="smooth">Smooth</option>
+                    </select>
+                </div>
+                <div class="dropdown-item">
+                    <i class="material-icons">highlight</i> Highlight Active Line
+                    <select id="highlightActiveSelect">
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="menu-item" onclick="toggleDropdown('ideMenu')">
+            IDE
+            <div class="dropdown" id="ideMenu">
+                <div class="dropdown-item">
+                    <i class="material-icons">auto_fix_high</i>
+                    <span class="dropdown-item-text">Auto Complete</span>
+                    <select id="autoCompleteSelect">
+                        <option value="true">On</option>
+                        <option value="false">Off</option>
+                    </select>
+                </div>
+                <div class="dropdown-item">
+                    <i class="material-icons">format_quote</i>
+                    <span class="dropdown-item-text">Auto Pairs</span>
+                    <select id="autoPairsSelect">
+                        <option value="true">On</option>
+                        <option value="false">Off</option>
+                    </select>
+                </div>
+                <div class="dropdown-item">
+                    <i class="material-icons">psychology</i>
+                    <span class="dropdown-item-text">Suggestions</span>
+                    <select id="suggestionsSelect">
+                        <option value="true">On</option>
+                        <option value="false">Off</option>
                     </select>
                 </div>
             </div>
@@ -71,4 +167,4 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.js"></script>
     <script src="renderer.js"></script>
 </body>
-</html> 
+</html>
