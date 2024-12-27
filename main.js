@@ -85,8 +85,14 @@ async function createWindow() {
             nodeIntegration: true,
             contextIsolation: true,
             preload: path.join(__dirname, 'preload.js')
-        }
+        },
+        autoHideMenuBar: true,
+        frame: true,
+        icon: path.join(__dirname, 'logo.png'),
+        title: 'Lumen IDE'
     })
+
+    mainWindow.setMenu(null)
 
     mainWindow.loadFile('index.html')
     mainWindow.maximize()
@@ -222,4 +228,35 @@ ipcMain.handle('console-input', async (event, text) => {
         return { success: true };
     }
     return { error: "No running process to receive input" };
+});
+
+ipcMain.handle('save-settings', async (event, newSettings) => {
+    try {
+        const settingsPath = path.join(__dirname, 'settings.json');
+        let settings = {};
+        
+        if (fs.existsSync(settingsPath)) {
+            settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+        }
+        
+        const updatedSettings = { ...settings, ...newSettings };
+        fs.writeFileSync(settingsPath, JSON.stringify(updatedSettings, null, 2));
+        
+        return { success: true };
+    } catch (error) {
+        return { error: error.message };
+    }
+});
+
+ipcMain.handle('load-settings', async () => {
+    try {
+        const settingsPath = path.join(__dirname, 'settings.json');
+        if (fs.existsSync(settingsPath)) {
+            const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+            return settings;
+        }
+        return null;
+    } catch (error) {
+        return { error: error.message };
+    }
 });
