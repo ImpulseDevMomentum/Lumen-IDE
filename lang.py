@@ -5,6 +5,8 @@
 from errorcomp import *
 from colorama import init, Fore, Style
 import string, os, math
+import random
+import re
 
 ########
 # CONS #
@@ -120,6 +122,9 @@ LU_COMMA       = 'COMMA'
 LU_ARROW       = 'ARROW'
 LU_NEWLINE     = 'NEWLINE'
 LU_EOF         = 'EOF'
+LU_AMPERSAND   = 'AMPERSAND'
+LU_PLUSEQ      = 'PLUSEQ'
+LU_MINUSEQ     = 'MINUSEQ'
 
 KEYWORDS = [
   'SET',
@@ -195,16 +200,25 @@ class Lexer:
       elif self.current_char == '"':
         tokens.append(self.make_string())
       elif self.current_char == '+':
-        tokens.append(Token(LU_PLUS, pos_start=self.pos))
-        self.advance()
-      elif self.current_char == '-':
-        if self.pos.idx + 1 < len(self.text) and self.text[self.pos.idx + 1] == '>':
-            tokens.append(Token(LU_ARROW, pos_start=self.pos))
-            self.advance()
-            self.advance()
+        if self.pos.idx + 1 < len(self.text) and self.text[self.pos.idx + 1] == '=':
+          tokens.append(Token(LU_PLUSEQ, pos_start=self.pos))
+          self.advance()
+          self.advance()
         else:
-            tokens.append(Token(LU_MINUS, pos_start=self.pos))
-            self.advance()
+          tokens.append(Token(LU_PLUS, pos_start=self.pos))
+          self.advance()
+      elif self.current_char == '-':
+        if self.pos.idx + 1 < len(self.text) and self.text[self.pos.idx + 1] == '=':
+          tokens.append(Token(LU_MINUSEQ, pos_start=self.pos))
+          self.advance()
+          self.advance()
+        elif self.pos.idx + 1 < len(self.text) and self.text[self.pos.idx + 1] == '>':
+          tokens.append(Token(LU_ARROW, pos_start=self.pos))
+          self.advance()
+          self.advance()
+        else:
+          tokens.append(Token(LU_MINUS, pos_start=self.pos))
+          self.advance()
       elif self.current_char == '*':
         tokens.append(Token(LU_MUL, pos_start=self.pos))
         self.advance()
@@ -238,6 +252,9 @@ class Lexer:
         tokens.append(self.make_greater_than())
       elif self.current_char == ',':
         tokens.append(Token(LU_COMMA, pos_start=self.pos))
+        self.advance()
+      elif self.current_char == '&':
+        tokens.append(Token(LU_AMPERSAND, pos_start=self.pos))
         self.advance()
       else:
         pos_start = self.pos.copy()
@@ -662,6 +679,30 @@ class Parser:
   def expr(self):
     res = ParseResult()
 
+    if self.current_tok.type == LU_IDENTIFIER:
+        var_name = self.current_tok
+        res.register_advancement()
+        self.advance()
+
+        if self.current_tok.type in (LU_PLUSEQ, LU_MINUSEQ):
+            op_tok = self.current_tok
+            res.register_advancement()
+            self.advance()
+            
+            expr = res.register(self.expr())
+            if res.error: return res
+            
+            operation = BinOpNode(
+                VarAccessNode(var_name),
+                Token(LU_PLUS if op_tok.type == LU_PLUSEQ else LU_MINUS, pos_start=op_tok.pos_start, pos_end=op_tok.pos_end),
+                expr
+            )
+            
+            return res.success(VarAssignNode(var_name, operation))
+
+        self.tok_idx -= 1
+        self.update_current_tok()
+
     if self.current_tok.matches(LU_KEYWORD, 'SET'):
         res.register_advancement()
         self.advance()
@@ -676,10 +717,26 @@ class Parser:
         res.register_advancement()
         self.advance()
 
+        if self.current_tok.type in (LU_PLUSEQ, LU_MINUSEQ):
+            op_tok = self.current_tok
+            res.register_advancement()
+            self.advance()
+            
+            expr = res.register(self.expr())
+            if res.error: return res
+            
+            operation = BinOpNode(
+                VarAccessNode(var_name),
+                Token(LU_PLUS if op_tok.type == LU_PLUSEQ else LU_MINUS, pos_start=op_tok.pos_start, pos_end=op_tok.pos_end),
+                expr
+            )
+            
+            return res.success(VarAssignNode(var_name, operation))
+
         if self.current_tok.type != LU_EQ:
             return res.failure(InvalidSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
-                "Expected '='"
+                "Expected '=', '+=' or '-='"
             ))
 
         res.register_advancement()
@@ -688,7 +745,7 @@ class Parser:
         if res.error: return res
         return res.success(VarAssignNode(var_name, expr))
 
-    node = res.register(self.bin_op(self.comp_expr, ((LU_KEYWORD, 'AND'), (LU_KEYWORD, 'OR'), LU_ARROW)))
+    node = res.register(self.bin_op(self.comp_expr, ((LU_KEYWORD, 'AND'), (LU_KEYWORD, 'OR'), (LU_AMPERSAND, None))))
 
     if res.error:
         return res.failure(InvalidSyntaxError(
@@ -786,19 +843,36 @@ class Parser:
     tok = self.current_tok
 
     if tok.type in (LU_INT, LU_FLOAT):
-      res.register_advancement()
-      self.advance()
-      return res.success(NumberNode(tok))
+        res.register_advancement()
+        self.advance()
+        return res.success(NumberNode(tok))
 
     elif tok.type == LU_STRING:
-      res.register_advancement()
-      self.advance()
-      return res.success(StringNode(tok))
+        res.register_advancement()
+        self.advance()
+        return res.success(StringNode(tok))
 
     elif tok.type == LU_IDENTIFIER:
-      res.register_advancement()
-      self.advance()
-      return res.success(VarAccessNode(tok))
+        res.register_advancement()
+        self.advance()
+        
+        if self.current_tok.type in (LU_PLUSEQ, LU_MINUSEQ):
+            op_tok = self.current_tok
+            res.register_advancement()
+            self.advance()
+            
+            expr = res.register(self.expr())
+            if res.error: return res
+            
+            operation = BinOpNode(
+                VarAccessNode(tok),
+                Token(LU_PLUS if op_tok.type == LU_PLUSEQ else LU_MINUS, pos_start=op_tok.pos_start, pos_end=op_tok.pos_end),
+                expr
+            )
+            
+            return res.success(VarAssignNode(tok, operation))
+            
+        return res.success(VarAccessNode(tok))
 
     elif tok.type == LU_LPAREN:
       res.register_advancement()
@@ -1257,39 +1331,23 @@ class Parser:
         res.register_advancement()
         self.advance()
 
-        if op_tok.type == LU_ARROW:
-            if not (isinstance(left, CallNode) and 
-                   isinstance(left.node_to_call, VarAccessNode) and 
-                   left.node_to_call.var_name_tok.value == 'PRINT'):
+        if op_tok.type in (LU_PLUSEQ, LU_MINUSEQ):
+            if not isinstance(left, VarAccessNode):
                 return res.failure(InvalidSyntaxError(
                     op_tok.pos_start, op_tok.pos_end,
-                    "Arrow operator can only be used after PRINT"
+                    f"Expected variable"
                 ))
-
-            if self.current_tok.type != LU_IDENTIFIER:
-                return res.failure(InvalidSyntaxError(
-                    self.current_tok.pos_start, self.current_tok.pos_end,
-                    "Expected identifier after '->'"
-                ))
-                
-            var_name = self.current_tok
-            res.register_advancement()
-            self.advance()
             
-            left = ListNode(
-                [
-                    left,
-                    VarAssignNode(
-                        var_name,
-                        CallNode(
-                            VarAccessNode(Token(LU_IDENTIFIER, 'INPUT_INT', pos_start=left.pos_start)),
-                            []
-                        )
-                    )
-                ],
-                left.pos_start,
-                var_name.pos_end
+            right = res.register(func_b())
+            if res.error: return res
+
+            operation = BinOpNode(
+                left,
+                Token(LU_PLUS if op_tok.type == LU_PLUSEQ else LU_MINUS, pos_start=op_tok.pos_start, pos_end=op_tok.pos_end),
+                right
             )
+            
+            left = VarAssignNode(left.var_name_tok, operation)
             continue
 
         right = res.register(func_b())
@@ -1542,6 +1600,8 @@ Number.null = Number(0)
 Number.false = Number(0)
 Number.true = Number(1)
 Number.math_PI = Number(math.pi)
+Number.math_E = Number(math.e)
+Number.math_TAU = Number(math.tau)
 
 class String(Value):
   def __init__(self, value):
@@ -1574,6 +1634,110 @@ class String(Value):
 
   def __repr__(self):
     return f'"{self.value}"'
+
+  def get_comparison_eq(self, other):
+    if isinstance(other, String):
+      return Number(int(self.value == other.value)).set_context(self.context), None
+    return None, Value.illegal_operation(self, other)
+
+  def get_comparison_ne(self, other):
+    if isinstance(other, String):
+      return Number(int(self.value != other.value)).set_context(self.context), None
+    return None, Value.illegal_operation(self, other)
+
+  def get_comparison_lt(self, other):
+    if isinstance(other, String):
+      return Number(int(self.value < other.value)).set_context(self.context), None
+    return None, Value.illegal_operation(self, other)
+
+  def get_comparison_gt(self, other):
+    if isinstance(other, String):
+      return Number(int(self.value > other.value)).set_context(self.context), None
+    return None, Value.illegal_operation(self, other)
+
+  def get_comparison_lte(self, other):
+    if isinstance(other, String):
+      return Number(int(self.value <= other.value)).set_context(self.context), None
+    return None, Value.illegal_operation(self, other)
+
+  def get_comparison_gte(self, other):
+    if isinstance(other, String):
+      return Number(int(self.value >= other.value)).set_context(self.context), None
+    return None, Value.illegal_operation(self, other)
+
+  def anded_by(self, other):
+    if isinstance(other, Number):
+      return Number(int(bool(self.value) and other.value)).set_context(self.context), None
+    return None, Value.illegal_operation(self, other)
+
+  def ored_by(self, other):
+    if isinstance(other, Number):
+      return Number(int(bool(self.value) or other.value)).set_context(self.context), None
+    return None, Value.illegal_operation(self, other)
+
+  def formatted(self, exec_ctx):
+    try:
+        result = self.value
+        if '{' in result and '}' in result:
+            current_ctx = exec_ctx
+            variables = {}
+            while current_ctx:
+                variables.update(current_ctx.symbol_table.symbols)
+                current_ctx = current_ctx.parent
+
+            matches = re.finditer(r'\{([^}]+)\}', result)
+            replacements = []
+            
+            for match in matches:
+                full_match = match.group(0)
+                placeholder = match.group(1)
+                
+                if ':' in placeholder:
+                    var_name, format_spec = placeholder.split(':')
+                    var_value = variables.get(var_name)
+                    if var_value is None:
+                        return None, RTError(
+                            self.pos_start, self.pos_end,
+                            f"Variable '{var_name}' is not defined",
+                            exec_ctx
+                        )
+                    
+                    if isinstance(var_value, Number):
+                        if format_spec.endswith('f'):
+                            try:
+                                precision = int(format_spec[1:-1])
+                                formatted_value = f"{float(var_value.value):.{precision}f}"
+                            except:
+                                formatted_value = str(var_value.value)
+                        else:
+                            formatted_value = str(var_value.value)
+                    else:
+                        formatted_value = str(var_value)
+                    replacements.append((full_match, formatted_value))
+                else:
+                    var_value = variables.get(placeholder)
+                    if var_value is None:
+                        return None, RTError(
+                            self.pos_start, self.pos_end,
+                            f"Variable '{placeholder}' is not defined",
+                            exec_ctx
+                        )
+                    if isinstance(var_value, Number):
+                        formatted_value = str(var_value.value)
+                    else:
+                        formatted_value = str(var_value)
+                    replacements.append((full_match, formatted_value))
+            
+            for old, new in replacements:
+                result = result.replace(old, new)
+                
+        return String(result).set_context(self.context), None
+    except Exception as e:
+        return None, RTError(
+            self.pos_start, self.pos_end,
+            f'Error in string formatting: {str(e)}',
+            exec_ctx
+        )
 
 class List(Value):
   def __init__(self, elements):
@@ -1739,7 +1903,16 @@ class BuiltInFunction(BaseFunction):
   #####################################
 
   def execute_print(self, exec_ctx):
-    print(str(exec_ctx.symbol_table.get('value')))
+    value = exec_ctx.symbol_table.get('value')
+    
+    if isinstance(value, String) and '{' in value.value and '}' in value.value:
+        result, error = value.formatted(exec_ctx)
+        if error: 
+            return RTResult().failure(error)
+        print(str(result))
+    else:
+        print(str(value))
+        
     return RTResult().success(Number.null)
   execute_print.arg_names = ['value']
   
@@ -1748,22 +1921,42 @@ class BuiltInFunction(BaseFunction):
   execute_print_ret.arg_names = ['value']
   
   def execute_input(self, exec_ctx):
-    print("input> ", end='', flush=True)
-    text = input()
+    prompt = exec_ctx.symbol_table.get("prompt")
+    if prompt:
+        if not isinstance(prompt, String):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                "Prompt must be a string",
+                exec_ctx
+            ))
+        text = input(f"{prompt.value}input> ")  # Dodane "input> "
+    else:
+        text = input("input> ")  # Dodane "input> "
     return RTResult().success(String(text))
-  execute_input.arg_names = []
+  execute_input.arg_names = ["prompt"]
 
   def execute_input_int(self, exec_ctx):
+    prompt = exec_ctx.symbol_table.get("prompt")
+    if prompt:
+        if not isinstance(prompt, String):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                "Prompt must be a string",
+                exec_ctx
+            ))
+    
     while True:
-      print("input_int> ", end='', flush=True)
-      text = input()
-      try:
-        number = int(text)
-        break
-      except ValueError:
-        print(f"'{text}' must be an integer. Try again!")
+        try:
+            if prompt:
+                text = input(f"{prompt.value}input_int> ")  # Dodane "input_int> "
+            else:
+                text = input("input_int> ")  # Dodane "input_int> "
+            number = int(text)
+            break
+        except ValueError:
+            print(f"'{text}' must be an integer. Try again!")
     return RTResult().success(Number(number))
-  execute_input_int.arg_names = []
+  execute_input_int.arg_names = ["prompt"]
 
   def execute_clear(self, exec_ctx):
     os.system('cls' if os.name == 'nt' else 'cls') 
@@ -1904,6 +2097,134 @@ class BuiltInFunction(BaseFunction):
     return RTResult().success(Number.null)
   execute_run.arg_names = ["fn"]
 
+  def execute_to_int(self, exec_ctx):
+    value = exec_ctx.symbol_table.get("value")
+    try:
+        if isinstance(value, String):
+            return RTResult().success(Number(int(value.value)))
+        elif isinstance(value, Number):
+            return RTResult().success(Number(int(value.value)))
+        else:
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"Cannot convert {type(value).__name__} to integer",
+                exec_ctx
+            ))
+    except ValueError:
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            f"Could not convert '{value.value}' to integer",
+            exec_ctx
+        ))
+
+  def execute_to_float(self, exec_ctx):
+    value = exec_ctx.symbol_table.get("value")
+    try:
+        if isinstance(value, String):
+            return RTResult().success(Number(float(value.value)))
+        elif isinstance(value, Number):
+            return RTResult().success(Number(float(value.value)))
+        else:
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"Cannot convert {type(value).__name__} to float",
+                exec_ctx
+            ))
+    except ValueError:
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            f"Could not convert '{value.value}' to float",
+            exec_ctx
+        ))
+
+  def execute_to_str(self, exec_ctx):
+    value = exec_ctx.symbol_table.get("value")
+    if isinstance(value, (Number, String, List)):
+        return RTResult().success(String(str(value)))
+    return RTResult().failure(RTError(
+        self.pos_start, self.pos_end,
+        f"Cannot convert {type(value).__name__} to string",
+        exec_ctx
+    ))
+
+  def execute_random_int(self, exec_ctx):
+    min_val = exec_ctx.symbol_table.get("min")
+    max_val = exec_ctx.symbol_table.get("max")
+
+    if not isinstance(min_val, Number):
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            "First argument must be a number",
+            exec_ctx
+        ))
+    
+    if not isinstance(max_val, Number):
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            "Second argument must be a number",
+            exec_ctx
+        ))
+
+    return RTResult().success(Number(random.randint(int(min_val.value), int(max_val.value))))
+  execute_random_int.arg_names = ["min", "max"]
+
+  def execute_random_float(self, exec_ctx):
+    min_val = exec_ctx.symbol_table.get("min")
+    max_val = exec_ctx.symbol_table.get("max")
+
+    if not isinstance(min_val, Number):
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            "First argument must be a number",
+            exec_ctx
+        ))
+    
+    if not isinstance(max_val, Number):
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            "Second argument must be a number",
+            exec_ctx
+        ))
+
+    return RTResult().success(Number(random.uniform(float(min_val.value), float(max_val.value))))
+  execute_random_float.arg_names = ["min", "max"]
+
+  def execute_random_choice(self, exec_ctx):
+    list_ = exec_ctx.symbol_table.get("list")
+
+    if not isinstance(list_, List):
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            "Argument must be a list",
+            exec_ctx
+        ))
+
+    if len(list_.elements) == 0:
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            "List cannot be empty",
+            exec_ctx
+        ))
+
+    return RTResult().success(random.choice(list_.elements))
+  execute_random_choice.arg_names = ["list"]
+
+  def execute_format(self, exec_ctx):
+    string = exec_ctx.symbol_table.get("string")
+    
+    if not isinstance(string, String):
+      return RTResult().failure(RTError(
+        self.pos_start, self.pos_end,
+        "First argument must be string",
+        exec_ctx
+      ))
+
+    result, error = string.formatted(exec_ctx)
+    if error: return RTResult().failure(error)
+    
+    return RTResult().success(result)
+  execute_format.arg_names = ["string"]
+
 BuiltInFunction.print       = BuiltInFunction("print")
 BuiltInFunction.print_ret   = BuiltInFunction("print_ret")
 BuiltInFunction.input       = BuiltInFunction("input")
@@ -1918,6 +2239,17 @@ BuiltInFunction.pop         = BuiltInFunction("pop")
 BuiltInFunction.extend      = BuiltInFunction("extend")
 BuiltInFunction.len					= BuiltInFunction("len")
 BuiltInFunction.run					= BuiltInFunction("run")
+BuiltInFunction.to_int      = BuiltInFunction("to_int")
+BuiltInFunction.to_float   = BuiltInFunction("to_float")
+BuiltInFunction.to_str     = BuiltInFunction("to_str")
+BuiltInFunction.random_int    = BuiltInFunction("random_int")
+BuiltInFunction.random_float  = BuiltInFunction("random_float")
+BuiltInFunction.random_choice = BuiltInFunction("random_choice")
+BuiltInFunction.format      = BuiltInFunction("format")
+
+BuiltInFunction.execute_to_int.arg_names = ["value"]
+BuiltInFunction.execute_to_float.arg_names = ["value"]
+BuiltInFunction.execute_to_str.arg_names = ["value"]
 
 ###########
 # CONTEXT #
@@ -2042,7 +2374,7 @@ class Interpreter:
       result, error = left.get_comparison_lte(right)
     elif node.op_tok.type == LU_GTE:
       result, error = left.get_comparison_gte(right)
-    elif node.op_tok.matches(LU_KEYWORD, 'AND'):
+    elif node.op_tok.matches(LU_KEYWORD, 'AND') or node.op_tok.type == LU_AMPERSAND:
       result, error = left.anded_by(right)
     elif node.op_tok.matches(LU_KEYWORD, 'OR'):
       result, error = left.ored_by(right)
@@ -2135,7 +2467,8 @@ class Interpreter:
 
     return res.success(
       Number.null if node.should_return_null else
-      List(elements).set_context(context).set_pos(node.pos_start, node.pos_end))
+      List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+    )
 
   def visit_WhileNode(self, node, context):
     res = RTResult()
@@ -2161,7 +2494,8 @@ class Interpreter:
 
     return res.success(
       Number.null if node.should_return_null else
-      List(elements).set_context(context).set_pos(node.pos_start, node.pos_end))
+      List(elements).set_context(context).set_pos(node.pos_start, node.pos_end)
+    )
 
   def visit_FuncDefNode(self, node, context):
     res = RTResult()
@@ -2219,6 +2553,8 @@ global_symbol_table.set("NULL", Number.null)
 global_symbol_table.set("FALSE", Number.false)
 global_symbol_table.set("TRUE", Number.true)
 global_symbol_table.set("MATH_PI", Number.math_PI)
+global_symbol_table.set("MATH_E", Number.math_E)
+global_symbol_table.set("MATH_TAU", Number.math_TAU)
 global_symbol_table.set("PRINT", BuiltInFunction.print)
 global_symbol_table.set("PRINT_RET", BuiltInFunction.print_ret)
 global_symbol_table.set("INPUT", BuiltInFunction.input)
@@ -2234,6 +2570,13 @@ global_symbol_table.set("POP", BuiltInFunction.pop)
 global_symbol_table.set("EXTEND", BuiltInFunction.extend)
 global_symbol_table.set("LEN", BuiltInFunction.len)
 global_symbol_table.set("RUN", BuiltInFunction.run)
+global_symbol_table.set("INT", BuiltInFunction.to_int)
+global_symbol_table.set("FLOAT", BuiltInFunction.to_float)
+global_symbol_table.set("STR", BuiltInFunction.to_str)
+global_symbol_table.set("RANDOM_INT", BuiltInFunction.random_int)
+global_symbol_table.set("RANDOM_FLOAT", BuiltInFunction.random_float)
+global_symbol_table.set("RANDOM_CHOICE", BuiltInFunction.random_choice)
+global_symbol_table.set("FORMAT", BuiltInFunction.format)
 
 def run(fn, text):
   # Generate tokens
