@@ -1,0 +1,262 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #282c34;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.toolbar {
+    padding: 12px 20px;
+    background-color: #21252b;
+    border-bottom: 1px solid #181a1f;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.editor-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#editor {
+    flex: 3;
+    width: 100%;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+#console {
+    flex: 1;
+    width: 100%;
+    background-color: #21252b;
+    color: #98c379;
+    font-family: 'Consolas', monospace;
+    padding: 10px;
+    overflow-y: auto;
+    border-top: 1px solid #181a1f;
+    min-height: 150px;
+    max-height: 300px;
+    resize: vertical;
+    white-space: pre-wrap;
+}
+
+select {
+    padding: 6px 12px;
+    background-color: #2d2d2d;
+    color: #fff;
+    border: 1px solid #3d3d3d;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: #528bff;
+}
+
+select:hover {
+    background-color: #353535;
+}
+
+button {
+    padding: 6px 16px;
+    background-color: #4d78cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #5a8ae8;
+}
+
+button:active {
+    background-color: #3d62a5;
+}
+
+.ace_editor {
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+}
+
+/* Separator between buttons */
+.toolbar > button:not(:last-child) {
+    margin-right: 8px;
+}
+
+/* Group related items */
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px;
+    border-right: 1px solid #3d3d3d;
+}
+
+.toolbar-group:last-child {
+    border-right: none;
+}
+
+.menu-bar {
+    background-color: #21252b;
+    padding: 4px 8px;
+    display: flex;
+    border-bottom: 1px solid #181a1f;
+}
+
+.menu-item {
+    color: #abb2bf;
+    padding: 4px 8px;
+    cursor: pointer;
+    position: relative;
+}
+
+.menu-item:hover {
+    background-color: #2c313a;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #21252b;
+    border: 1px solid #181a1f;
+    min-width: 180px;
+    z-index: 1000;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    color: #abb2bf;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #2c313a;
+}
+
+.dropdown-divider {
+    border-top: 1px solid #181a1f;
+    margin: 4px 0;
+}
+
+.console-container {
+    position: relative;
+    background-color: #21252b;
+    border-top: 1px solid #181a1f;
+}
+
+.resize-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    cursor: ns-resize;
+}
+
+.console-header {
+    padding: 6px 12px;
+    background-color: #2c313a;
+    color: #abb2bf;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 12px;
+    border-bottom: 1px solid #181a1f;
+    user-select: none;
+}
+
+#console {
+    font-family: 'Consolas', monospace;
+    color: #98c379;
+    padding: 12px;
+    min-height: 150px;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 14px;
+    background-color: #282c34;
+}
+
+/* Scrollbar styling */
+#console::-webkit-scrollbar {
+    width: 12px;
+}
+
+#console::-webkit-scrollbar-track {
+    background: #21252b;
+}
+
+#console::-webkit-scrollbar-thumb {
+    background-color: #3d4451;
+    border-radius: 6px;
+    border: 3px solid #21252b;
+}
+
+.dropdown-item select {
+    margin-left: 10px;
+    width: 120px;
+    z-index: 1001;
+    position: relative;
+}
+
+.dropdown-item i {
+    vertical-align: middle;
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+.dropdown-item, .menu-item {
+    user-select: none;
+}
+
+.dropdown-item:hover select {
+    pointer-events: auto;
+}
+
+.ansi-red {
+    color: #e06c75;
+}
+
+.ansi-yellow {
+    color: #e5c07b;
+}
+
+.console-input {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    background-color: #282c34;
+    margin-top: 5px;
+}
+
+.input-prompt {
+    color: #98c379;
+    margin-right: 5px;
+    font-family: 'Consolas', monospace;
+}
+
+.console-input-field {
+    background: transparent;
+    border: none;
+    color: #98c379;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    flex: 1;
+    outline: none;
+    padding: 0;
+}

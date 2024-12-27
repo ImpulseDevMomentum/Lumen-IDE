@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lumen IDE</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+    <div class="menu-bar">
+        <div class="menu-item" onclick="toggleDropdown('fileMenu')">
+            File
+            <div class="dropdown" id="fileMenu">
+                <div class="dropdown-item" onclick="openFile()">
+                    <i class="material-icons">folder_open</i> Open (Ctrl+O)
+                </div>
+                <div class="dropdown-item" onclick="saveFile()">
+                    <i class="material-icons">save</i> Save (Ctrl+S)
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item" onclick="runCode()">
+                    <i class="material-icons">play_arrow</i> Run (F5)
+                </div>
+                <div class="dropdown-item" onclick="stopCode()">
+                    <i class="material-icons">stop</i> Stop (F6)
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item" onclick="window.close()">
+                    <i class="material-icons">exit_to_app</i> Exit
+                </div>
+            </div>
+        </div>
+        <div class="menu-item" onclick="toggleDropdown('viewMenu')">
+            View
+            <div class="dropdown" id="viewMenu">
+                <div class="dropdown-item">
+                    <i class="material-icons">palette</i> Theme
+                    <select id="themeSelect">
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                        <option value="purple_haze">Purple Haze</option>
+                        <option value="lavender_dream">Lavender Dream</option>
+                        <option value="violet_twilight">Violet Twilight</option>
+                    </select>
+                </div>
+                <div class="dropdown-item">
+                    <i class="material-icons">format_size</i> Font Size
+                    <select id="fontSizeSelect">
+                        <option value="12">12px</option>
+                        <option value="14">14px</option>
+                        <option value="16">16px</option>
+                        <option value="18">18px</option>
+                        <option value="20">20px</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor-container">
+        <div id="editor"></div>
+        <div class="console-container" id="consoleContainer">
+            <div class="console-header">
+                <span>Console</span>
+                <div class="resize-handle"></div>
+            </div>
+            <div id="console"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html> 
