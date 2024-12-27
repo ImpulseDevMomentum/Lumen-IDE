@@ -14,7 +14,6 @@ define('ace/mode/lumen', function(require, exports, module) {
     exports.Mode = Mode;
 });
 
-// Trzeba potem zmienić na inne bo trochę odstaję od tego co miałem w głowie
 define('ace/mode/lumen_highlight_rules', function(require, exports, module) {
     const oop = require("ace/lib/oop");
     const TextHighlightRules = require("ace/mode/text_highlight_rules").TextHighlightRules;
@@ -24,7 +23,16 @@ define('ace/mode/lumen_highlight_rules', function(require, exports, module) {
             "start": [
                 {
                     token: "keyword",
-                    regex: "\\b(SET|ELSE|PRINT|IF|THEN|OTHER|STOP|FOR|TO|STEP|NEXT|WHILE|DO|INPUT|INPUT_INT|AND|OR|NOT|FUNC|BACK|BREAK)\\b"
+                    regex: "\\b(SET|ELSE|PRINT|IF|THEN|OTHER|STOP|FOR|TO|STEP|NEXT|WHILE|DO|INPUT|INPUT_INT|AND|OR|NOT|FUNC|BACK|BREAK|FLOAT|INT|STR|TRUE|FALSE|RANDOM_INT|RANDOM_FLOAT|RANDOM_CHOICE|FORMAT)\\b"
+                },
+                {
+                    token: "constant.language",
+                    regex: "\\b(NULL|TRUE|FALSE|MATH_PI|MATH_E|MATH_TAU)\\b"
+                },
+                {
+                    token: ["string", "variable", "string"],
+                    regex: '(".*?)({[^}]+})(.*?")',
+                    merge: false
                 },
                 {
                     token: "string",
@@ -32,7 +40,7 @@ define('ace/mode/lumen_highlight_rules', function(require, exports, module) {
                 },
                 {
                     token: "constant.numeric",
-                    regex: "\\b\\d+\\b"
+                    regex: "\\b\\d+(\\.\\d+)?\\b"
                 },
                 {
                     token: "comment",
@@ -40,7 +48,15 @@ define('ace/mode/lumen_highlight_rules', function(require, exports, module) {
                 },
                 {
                     token: "keyword.operator",
-                    regex: "\\+|\\-|\\*|\\/|\\=|\\<|\\>|\\<=|\\>=|\\<>"
+                    regex: "\\+\\=|\\-\\=|\\+|\\-|\\*|\\/|\\=|\\<|\\>|\\<=|\\>=|\\<>|\\&|\\^"
+                },
+                {
+                    token: "support.function",
+                    regex: "\\b(PRINT|INPUT|INPUT_INT|INT|FLOAT|STR|RANDOM_INT|RANDOM_FLOAT|RANDOM_CHOICE|FORMAT)\\s*\\("
+                },
+                {
+                    token: "string.formatting",
+                    regex: ":\\d*\\.?\\d*f"
                 }
             ]
         };
@@ -65,6 +81,24 @@ const themes = {
         foreground: "#383a42",
         consoleBackground: "#f0f0f0",
         consoleForeground: "#383a42"
+    },
+    github_dark: {
+        editorTheme: "ace/theme/dracula",
+        background: "#0d1117",
+        foreground: "#c9d1d9",
+        consoleBackground: "#161b22",
+        consoleForeground: "#8b949e",
+        menuBackground: "#161b22",
+        menuForeground: "#c9d1d9"
+    },
+    midnight: {
+        editorTheme: "ace/theme/cobalt",
+        background: "#000C18",
+        foreground: "#6688CC",
+        consoleBackground: "#002240",
+        consoleForeground: "#FFFFFF",
+        menuBackground: "#002240",
+        menuForeground: "#6688CC"
     },
     purple_haze: {
         editorTheme: "ace/theme/twilight",
@@ -138,13 +172,99 @@ document.getElementById('themeSelect').addEventListener('change', (e) => {
     document.querySelectorAll('.dropdown').forEach(dropdown => {
         dropdown.style.backgroundColor = theme.background;
     });
+
+    saveSettings({ theme: themeName });
 });
 
 document.getElementById('fontSizeSelect').addEventListener('change', (e) => {
-    editor.setFontSize(parseInt(e.target.value));
+    const fontSize = parseInt(e.target.value);
+    editor.setFontSize(fontSize);
+    saveSettings({ font_size: fontSize });
 });
 
-// File handling
+document.getElementById('fontFamilySelect').addEventListener('change', (e) => {
+    const fontFamily = e.target.value;
+    editor.setOption("fontFamily", fontFamily);
+    document.getElementById('editor').style.fontFamily = fontFamily;
+    
+    saveSettings({ font_family: fontFamily });
+});
+
+document.getElementById('tabSizeSelect').addEventListener('change', (e) => {
+    const tabSize = parseInt(e.target.value);
+    editor.setOption("tabSize", tabSize);
+    saveSettings({ tab_size: tabSize });
+});
+
+document.getElementById('wordWrapSelect').addEventListener('change', (e) => {
+    const wordWrap = e.target.value;
+    if (wordWrap === 'off') {
+        editor.setOption("wrap", false);
+    } else {
+        editor.setOption("wrap", true);
+        editor.setOption("wrapLimit", parseInt(wordWrap));
+    }
+    saveSettings({ word_wrap: wordWrap });
+});
+
+document.getElementById('lineHeightSelect').addEventListener('change', (e) => {
+    const lineHeight = parseFloat(e.target.value);
+    editor.container.style.lineHeight = lineHeight;
+    saveSettings({ line_height: lineHeight });
+});
+
+document.getElementById('cursorStyleSelect').addEventListener('change', (e) => {
+    const cursorStyle = e.target.value;
+    editor.setOption("cursorStyle", cursorStyle);
+    saveSettings({ cursor_style: cursorStyle });
+});
+
+document.getElementById('highlightActiveSelect').addEventListener('change', (e) => {
+    const highlight = e.target.value === 'true';
+    editor.setHighlightActiveLine(highlight);
+    saveSettings({ highlight_active_line: highlight });
+});
+
+async function saveSettings(newSettings) {
+    try {
+        const response = await window.electron.ipcRenderer.invoke('save-settings', newSettings);
+        if (response.error) {
+            console.error('Failed to save settings:', response.error);
+        }
+    } catch (error) {
+        console.error('Error saving settings:', error);
+    }
+}
+
+async function loadSettings() {
+    try {
+        const settings = await window.electron.ipcRenderer.invoke('load-settings');
+        if (settings) {
+            if (settings.auto_complete !== undefined) {
+                const autoComplete = settings.auto_complete === true || settings.auto_complete === 'true';
+                document.getElementById('autoCompleteSelect').value = String(autoComplete);
+                setupAutoComplete(autoComplete);
+            }
+
+            if (settings.auto_pairs !== undefined) {
+                const autoPairs = settings.auto_pairs === true || settings.auto_pairs === 'true';
+                document.getElementById('autoPairsSelect').value = String(autoPairs);
+                setupAutoPairs(autoPairs);
+            }
+
+            if (settings.suggestions !== undefined) {
+                const suggestions = settings.suggestions === true || settings.suggestions === 'true';
+                document.getElementById('suggestionsSelect').value = String(suggestions);
+                setupSuggestions(suggestions);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading settings:', error);
+    }
+}
+
+loadSettings();
+
 async function openFile() {
     const result = await window.electron.ipcRenderer.invoke('open-file');
     if (result) {
@@ -273,6 +393,18 @@ window.electron.ipcRenderer.on('console-error', (text) => {
 });
 
 document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        newFile();
+    }
+    if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+        e.preventDefault();
+        saveFileAs();
+    }
+    if (e.ctrlKey && e.key === 'j') {
+        e.preventDefault();
+        toggleConsole();
+    }
     if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
         saveFile();
@@ -331,3 +463,181 @@ window.electron.ipcRenderer.on('input-requested', () => {
     consoleInput.style.display = 'block';
     inputField.focus();
 });
+
+async function newFile() {
+    if (editor.getValue().trim() !== '') {
+        if (confirm('Current file has unsaved changes. Create new file anyway?')) {
+            editor.setValue('', -1);
+            currentFilePath = null;
+        }
+    } else {
+        editor.setValue('', -1);
+        currentFilePath = null;
+    }
+}
+
+async function saveFileAs() {
+    currentFilePath = null;
+    await saveFile();
+}
+
+function toggleConsole() {
+    const consoleContainer = document.querySelector('.console-container');
+    consoleContainer.style.display = consoleContainer.style.display === 'none' ? 'block' : 'none';
+}
+
+const completions = {
+    keywords: [
+        "SET", "IF", "THEN", "ELSE", "FOR", "TO", "STEP", "WHILE", "FUNC", 
+        "PRINT", "INPUT", "INPUT_INT", "BREAK", "CONTINUE", "AND", "OR", "NOT"
+    ],
+    snippets: {
+        "PRINT": "PRINT(${1})",
+        "IF": "IF ${1} THEN\n    ${2}\nSTOP",
+        "FOR": "FOR ${1} = ${2} TO ${3} THEN\n    ${4}\nSTOP",
+        "WHILE": "WHILE ${1} THEN\n    ${2}\nSTOP",
+        "FUNC": "FUNC ${1}(${2})\n    ${3}\nSTOP"
+    },
+    variables: new Set()
+}
+
+// Konfiguracja edytora
+editor.setOptions({
+    enableBasicAutocompletion: true,
+    enableLiveAutocompletion: true,
+    enableSnippets: true,
+    showPrintMargin: false,
+    fontSize: "14px"
+});
+
+function setupAutoPairs(enabled) {
+    editor.off('change');
+    
+    if (enabled) {
+        editor.commands.addCommand({
+            name: 'insertParenthesis',
+            bindKey: '(',
+            exec: function(editor) {
+                editor.insert('()');
+                editor.navigateLeft();
+            }
+        });
+
+        editor.commands.addCommand({
+            name: 'insertBracket',
+            bindKey: '[',
+            exec: function(editor) {
+                editor.insert('[]');
+                editor.navigateLeft();
+            }
+        });
+
+        editor.commands.addCommand({
+            name: 'insertBrace',
+            bindKey: '{',
+            exec: function(editor) {
+                editor.insert('{}');
+                editor.navigateLeft();
+            }
+        });
+
+        editor.commands.addCommand({
+            name: 'insertQuote',
+            bindKey: '"',
+            exec: function(editor) {
+                editor.insert('""');
+                editor.navigateLeft();
+            }
+        });
+    } else {
+        editor.commands.removeCommand('insertParenthesis');
+        editor.commands.removeCommand('insertBracket');
+        editor.commands.removeCommand('insertBrace');
+        editor.commands.removeCommand('insertQuote');
+    }
+}
+
+function setupAutoComplete(enabled) {
+    editor.setOptions({
+        enableBasicAutocompletion: enabled,
+        enableLiveAutocompletion: enabled
+    });
+}
+
+function setupSuggestions(enabled) {
+    editor.setOptions({
+        enableSnippets: enabled
+    });
+}
+
+document.getElementById('autoCompleteSelect').addEventListener('change', (e) => {
+    const enabled = e.target.value === 'true';
+    setupAutoComplete(enabled);
+    saveSettings({ auto_complete: enabled });
+});
+
+document.getElementById('autoPairsSelect').addEventListener('change', (e) => {
+    const enabled = e.target.value === 'true';
+    setupAutoPairs(enabled);
+    saveSettings({ auto_pairs: enabled });
+});
+
+document.getElementById('suggestionsSelect').addEventListener('change', (e) => {
+    const enabled = e.target.value === 'true';
+    setupSuggestions(enabled);
+    saveSettings({ suggestions: enabled });
+});
+
+const lumenlangCompleter = {
+    getCompletions: function(editor, session, pos, prefix, callback) {
+        const completionList = [];
+        
+        completions.keywords.forEach(keyword => {
+            completionList.push({
+                caption: keyword,
+                value: keyword,
+                meta: "keyword",
+                score: 100
+            });
+        });
+
+        Object.entries(completions.snippets).forEach(([name, snippet]) => {
+            completionList.push({
+                caption: name,
+                value: snippet,
+                meta: "snippet",
+                score: 90
+            });
+        });
+
+        completions.variables.forEach(variable => {
+            completionList.push({
+                caption: variable,
+                value: variable,
+                meta: "variable",
+                score: 80
+            });
+        });
+
+        callback(null, completionList);
+    }
+};
+
+editor.completers = [lumenlangCompleter];
+
+editor.setBehavioursEnabled(true);
+editor.getSession().setOption("useWorker", true);
+
+editor.getSession().on('change', function() {
+    const content = editor.getValue();
+    const setMatches = content.match(/SET\s+([a-zA-Z_]\w*)/g);
+    if (setMatches) {
+        setMatches.forEach(match => {
+            const varName = match.replace('SET ', '').trim();
+            completions.variables.add(varName);
+        });
+    }
+});
+
+editor.getSession().setOption("useWorker", true);
+editor.session.setMode("ace/mode/lumen");
