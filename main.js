@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const { spawn } = require('child_process')
@@ -259,4 +259,10 @@ ipcMain.handle('load-settings', async () => {
     } catch (error) {
         return { error: error.message };
     }
+});
+
+ipcMain.handle('open-docs', async () => {
+    const docsUrl = 'https://github.com/ImpulseDevMomentum/Lumen/wiki';
+    await shell.openExternal(docsUrl);
+    return { success: true };
 });
