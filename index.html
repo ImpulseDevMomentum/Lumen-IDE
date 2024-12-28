@@ -150,6 +150,18 @@
                 </div>
             </div>
         </div>
+        <div class="menu-item" onclick="toggleDropdown('docsMenu')">
+            Docs
+            <div class="dropdown" id="docsMenu">
+                <div class="dropdown-item" onclick="window.electron.openDocs()">
+                    <i class="material-icons">menu_book</i> Documentation
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item" onclick="window.open('https://github.com/ImpulseDevMomentum/Lumen-IDE')">
+                    <i class="material-icons">code</i> Source Code
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="editor-container">
