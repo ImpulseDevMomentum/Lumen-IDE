@@ -262,7 +262,7 @@ ipcMain.handle('load-settings', async () => {
 });
 
 ipcMain.handle('open-docs', async () => {
-    const docsUrl = 'https://github.com/ImpulseDevMomentum/Lumen/wiki';
+    const docsUrl = 'https://lumenlang.gitbook.io/lumen-docs';
     await shell.openExternal(docsUrl);
     return { success: true };
 });
