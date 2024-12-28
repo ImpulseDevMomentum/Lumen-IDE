@@ -9,9 +9,6 @@ It was based on this tutorial: https://www.youtube.com/watch?v=Eythq9848Fg&list=
 
 > Sadly I couldn't attach/upload node_modules files
 
-> **Note**: editor.py is the more reliable and stable version, whereas editorbeta.py 
-> includes experimental features that might not work consistently and is subject to frequent changes.
-
 > and some syntax differences! (in Lumen):
 
 - instead of `ELIF` you have `OTHER` <br>
