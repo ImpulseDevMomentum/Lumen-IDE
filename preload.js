@@ -14,5 +14,6 @@ contextBridge.exposeInMainWorld('electron', {
                 ipcRenderer.on(channel, (event, ...args) => func(...args));
             }
         }
-    }
+    },
+    openDocs: () => ipcRenderer.invoke('open-docs'),
 })
