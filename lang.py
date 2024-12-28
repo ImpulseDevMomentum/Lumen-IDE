@@ -1775,11 +1775,11 @@ class List(Value):
   def dived_by(self, other):
     if isinstance(other, Number):
       try:
-        return self.elements[other.value], None
+        return String(self.value[int(other.value)]).set_context(self.context), None
       except:
         return None, RTError(
           other.pos_start, other.pos_end,
-          'Element at this index could not be retrieved from list because index is out of bounds',
+          'Character at this index could not be retrieved from string because index is out of bounds',
           self.context
         )
     else:
@@ -2052,14 +2052,16 @@ class BuiltInFunction(BaseFunction):
   def execute_len(self, exec_ctx):
     list_ = exec_ctx.symbol_table.get("list")
 
-    if not isinstance(list_, List):
-      return RTResult().failure(RTError(
+    if isinstance(list_, List):
+        return RTResult().success(Number(len(list_.elements)))
+    elif isinstance(list_, String):
+        return RTResult().success(Number(len(list_.value)))
+    
+    return RTResult().failure(RTError(
         self.pos_start, self.pos_end,
-        "Argument must be list",
+        "Argument must be list or string",
         exec_ctx
-      ))
-
-    return RTResult().success(Number(len(list_.elements)))
+    ))
   execute_len.arg_names = ["list"]
 
   def execute_run(self, exec_ctx):
