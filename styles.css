@@ -289,3 +289,23 @@ button:active {
 #ideMenu .dropdown-item i.material-icons {
     color: #98c379;
 }
+
+.toolbar-button {
+    padding: 8px 12px;
+    margin: 0 4px;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.toolbar-button:hover {
+    background: var(--hover-color);
+}
+
+.toolbar-button i {
+    font-size: 16px;
+}
