@@ -90,63 +90,59 @@ define('ace/mode/lumen_highlight_rules', function(require, exports, module) {
 
 editor.session.setMode("ace/mode/lumen");
 
-const themes = {
-    dark: {
-        editorTheme: "ace/theme/monokai",
-        background: "#282c34",
-        foreground: "#abb2bf",
-        consoleBackground: "#21252b",
-        consoleForeground: "#98c379"
-    },
-    light: {
-        editorTheme: "ace/theme/chrome",
-        background: "#ffffff",
-        foreground: "#383a42",
-        consoleBackground: "#f0f0f0",
-        consoleForeground: "#383a42"
-    },
-    github_dark: {
-        editorTheme: "ace/theme/dracula",
-        background: "#0d1117",
-        foreground: "#c9d1d9",
-        consoleBackground: "#161b22",
-        consoleForeground: "#8b949e",
-        menuBackground: "#161b22",
-        menuForeground: "#c9d1d9"
-    },
-    midnight: {
-        editorTheme: "ace/theme/cobalt",
-        background: "#000C18",
-        foreground: "#6688CC",
-        consoleBackground: "#002240",
-        consoleForeground: "#FFFFFF",
-        menuBackground: "#002240",
-        menuForeground: "#6688CC"
-    },
-    purple_haze: {
-        editorTheme: "ace/theme/twilight",
-        background: "#2e1a47",
-        foreground: "#d1bfe2",
-        consoleBackground: "#27163a",
-        consoleForeground: "#b39dd8",
-        menuBackground: "#2e1a47",
-        menuForeground: "#d1bfe2"
-    },
-    lavender_dream: {
-        editorTheme: "ace/theme/pastel_on_dark",
-        background: "#352c61",
-        foreground: "#c9b1e1",
-        consoleBackground: "#2a2149",
-        consoleForeground: "#9b87cc"
-    },
-    violet_twilight: {
-        editorTheme: "ace/theme/merbivore_soft",
-        background: "#251a40",
-        foreground: "#b197cf",
-        consoleBackground: "#1f1433",
-        consoleForeground: "#9f82bc"
+let themes = {};
+
+async function loadThemes() {
+    try {
+        themes = await window.electron.ipcRenderer.invoke('load-themes');
+        if (themes.error) {
+            console.error('Error loading themes:', themes.error);
+            return;
+        }
+        
+        const themeSelect = document.getElementById('themeSelect');
+        themeSelect.innerHTML = '';
+        
+        Object.keys(themes).forEach(themeName => {
+            const option = document.createElement('option');
+            option.value = themeName;
+            option.textContent = themeName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            themeSelect.appendChild(option);
+        });
+        
+        const settings = await window.electron.ipcRenderer.invoke('load-settings');
+        const themeName = settings?.theme || 'dark';
+        if (themes[themeName]) {
+            applyTheme(themeName);
+            themeSelect.value = themeName;
+        }
+    } catch (error) {
+        console.error('Error initializing themes:', error);
     }
-};
+}
+
+function applyTheme(themeName) {
+    const theme = themes[themeName];
+    if (!theme) return;
+
+    editor.setTheme(theme.editorTheme);
+    document.body.style.backgroundColor = theme.background;
+    document.body.style.color = theme.foreground;
+    
+    const consoleEl = document.getElementById('console');
+    const consoleContainer = document.querySelector('.console-container');
+    
+    consoleEl.style.backgroundColor = theme.consoleBackground;
+    consoleEl.style.color = theme.consoleForeground;
+    consoleContainer.style.backgroundColor = theme.consoleBackground;
+    
+    document.querySelector('.menu-bar').style.backgroundColor = theme.menuBackground || theme.background;
+    document.querySelectorAll('.dropdown').forEach(dropdown => {
+        dropdown.style.backgroundColor = theme.menuBackground || theme.background;
+    });
+}
+
+loadThemes();
 
 let currentFilePath = null;
 const console = document.getElementById('console');
@@ -178,24 +174,7 @@ function handleMouseMove(e) {
 
 document.getElementById('themeSelect').addEventListener('change', (e) => {
     const themeName = e.target.value;
-    const theme = themes[themeName];
-    
-    editor.setTheme(theme.editorTheme);
-    document.body.style.backgroundColor = theme.background;
-    document.body.style.color = theme.foreground;
-    
-    const consoleEl = document.getElementById('console');
-    const consoleContainer = document.querySelector('.console-container');
-    
-    consoleEl.style.backgroundColor = theme.consoleBackground;
-    consoleEl.style.color = theme.consoleForeground;
-    consoleContainer.style.backgroundColor = theme.consoleBackground;
-    
-    document.querySelector('.menu-bar').style.backgroundColor = theme.background;
-    document.querySelectorAll('.dropdown').forEach(dropdown => {
-        dropdown.style.backgroundColor = theme.background;
-    });
-
+    applyTheme(themeName);
     saveSettings({ theme: themeName });
 });
 
@@ -524,7 +503,6 @@ const completions = {
     variables: new Set()
 }
 
-// Konfiguracja edytora
 editor.setOptions({
     enableBasicAutocompletion: true,
     enableLiveAutocompletion: true,
