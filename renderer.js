@@ -33,7 +33,7 @@ define('ace/mode/lumen_highlight_rules', function(require, exports, module) {
             "start": [
                 {
                     token: "keyword",
-                    regex: "\\b(SET|ELSE|PRINT|IF|THEN|OTHER|STOP|FOR|TO|STEP|NEXT|WHILE|DO|INPUT|INPUT_INT|AND|OR|NOT|FUNC|BACK|BREAK|FLOAT|INT|STR|TRUE|FALSE|RANDOM_INT|RANDOM_FLOAT|RANDOM_CHOICE|FORMAT)\\b"
+                    regex: "\\b(SET|ELSE|PRINT|IF|THEN|OTHER|STOP|FOR|TO|STEP|NEXT|WHILE|DO|INPUT|INPUT_INT|AND|OR|NOT|FUNC|BACK|BREAK|FLOAT|INT|STR|TRUE|FALSE|RANDOM_INT|RANDOM_FLOAT|RANDOM_CHOICE|FORMAT|CLEAR|IS_FUNCTION|IS_LIST|IS_NUMBER|IS_STRING|APPEND|POP|EXTEND|LEN|RUN|INT|FLOAT|STR|RANDOM_INT|RANDOM_FLOAT|RANDOM_CHOICE|FORMAT)\\b"
                 },
                 {
                     token: "constant.language",
@@ -438,14 +438,36 @@ document.addEventListener('keydown', (e) => {
 const completions = {
     keywords: [
         "SET", "IF", "THEN", "ELSE", "FOR", "TO", "STEP", "WHILE", "FUNC", 
-        "PRINT", "INPUT", "INPUT_INT", "BREAK", "CONTINUE", "AND", "OR", "NOT"
+        "PRINT", "INPUT", "INPUT_INT", "BREAK", "CONTINUE", "AND", "OR", "NOT",
+        "FLOAT", "INT", "STR", "TRUE", "FALSE", "NULL",
+        "MATH_PI", "MATH_E", "MATH_TAU", "CLEAR", "IS_FUNCTION", "IS_LIST", 
+        "IS_NUMBER", "IS_STRING", "APPEND", "POP", "EXTEND", "LEN", "RUN", "INT", 
+        "FLOAT", "STR", "RANDOM_INT", "RANDOM_FLOAT", "RANDOM_CHOICE", "FORMAT"
     ],
     snippets: {
         "PRINT": "PRINT(${1})",
         "IF": "IF ${1} THEN\n    ${2}\nSTOP",
         "FOR": "FOR ${1} = ${2} TO ${3} THEN\n    ${4}\nSTOP",
         "WHILE": "WHILE ${1} THEN\n    ${2}\nSTOP",
-        "FUNC": "FUNC ${1}(${2})\n    ${3}\nSTOP"
+        "FUNC": "FUNC ${1}(${2})\n    ${3}\nSTOP",
+        "INPUT": "INPUT(${1})",
+        "INPUT_INT": "INPUT_INT(${1})",
+        "RANDOM_INT": "RANDOM_INT(${1}, ${2})",
+        "RANDOM_FLOAT": "RANDOM_FLOAT(${1}, ${2})",
+        "RANDOM_CHOICE": "RANDOM_CHOICE(${1})",
+        "FORMAT": "FORMAT(${1})",
+        "LEN": "LEN(${1})",
+        "APPEND": "APPEND(${1}, ${2})",
+        "POP": "POP(${1}, ${2})",
+        "EXTEND": "EXTEND(${1}, ${2})",
+        "TO_INT": "TO_INT(${1})",
+        "TO_FLOAT": "TO_FLOAT(${1})",
+        "TO_STR": "TO_STR(${1})",
+        "IS_NUMBER": "IS_NUMBER(${1})",
+        "IS_STRING": "IS_STRING(${1})",
+        "IS_LIST": "IS_LIST(${1})",
+        "IS_FUNCTION": "IS_FUNCTION(${1})",
+        "CLEAR": "CLEAR()"
     },
     variables: new Set()
 }
