@@ -2,6 +2,16 @@ const editor = ace.edit("editor")
 editor.setTheme("ace/theme/monokai")
 editor.setFontSize(14)
 
+ace.require("ace/ext/language_tools");
+
+editor.setOptions({
+    enableBasicAutocompletion: true,
+    enableLiveAutocompletion: true,
+    enableSnippets: true,
+    showPrintMargin: false,
+    fontSize: "14px"
+});
+
 define('ace/mode/lumen', function(require, exports, module) {
     const oop = require("ace/lib/oop");
     const TextMode = require("ace/mode/text").Mode;
@@ -425,69 +435,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-editor.setOptions({
-    enableBasicAutocompletion: true,
-    enableLiveAutocompletion: true,
-    showPrintMargin: false,
-    fontSize: "14px"
-});
-
-editor.setTheme(themes.dark.editorTheme); 
-
-const consoleContainer = document.querySelector('.console-container');
-const consoleInput = document.createElement('div');
-consoleInput.className = 'console-input';
-consoleInput.style.display = 'none';
-consoleInput.innerHTML = `
-    <span class="input-prompt">&gt;</span>
-    <input type="text" class="console-input-field" />
-`;
-consoleContainer.appendChild(consoleInput);
-
-const inputField = consoleInput.querySelector('.console-input-field');
-
-inputField.addEventListener('keypress', async (e) => {
-    if (e.key === 'Enter') {
-        const text = inputField.value;
-        console.innerHTML += text + '\n';
-        try {
-            await window.electron.ipcRenderer.invoke('console-input', text);
-        } catch (error) {
-            console.innerHTML += `Error: ${error.message}\n`;
-        }
-        inputField.value = '';
-        consoleInput.style.display = 'none';
-        console.scrollTop = console.scrollHeight;
-    }
-});
-
-window.electron.ipcRenderer.on('input-requested', () => {
-    consoleInput.style.display = 'block';
-    inputField.focus();
-});
-
-async function newFile() {
-    if (editor.getValue().trim() !== '') {
-        if (confirm('Current file has unsaved changes. Create new file anyway?')) {
-            editor.setValue('', -1);
-            currentFilePath = null;
-        }
-    } else {
-        editor.setValue('', -1);
-        currentFilePath = null;
-    }
-}
-
-async function saveFileAs() {
-    currentFilePath = null;
-    await saveFile();
-}
-
-function toggleConsole() {
-    const consoleContainer = document.querySelector('.console-container');
-    consoleContainer.style.display = consoleContainer.style.display === 'none' ? 'block' : 'none';
-}
-
 const completions = {
     keywords: [
         "SET", "IF", "THEN", "ELSE", "FOR", "TO", "STEP", "WHILE", "FUNC", 
@@ -503,17 +450,7 @@ const completions = {
     variables: new Set()
 }
 
-editor.setOptions({
-    enableBasicAutocompletion: true,
-    enableLiveAutocompletion: true,
-    enableSnippets: true,
-    showPrintMargin: false,
-    fontSize: "14px"
-});
-
 function setupAutoPairs(enabled) {
-    editor.off('change');
-    
     if (enabled) {
         editor.commands.addCommand({
             name: 'insertParenthesis',
@@ -558,17 +495,62 @@ function setupAutoPairs(enabled) {
     }
 }
 
+const lumenlangCompleter = {
+    getCompletions: function(editor, session, pos, prefix, callback) {
+        const completionList = [];
+        
+        completions.keywords.forEach(keyword => {
+            completionList.push({
+                caption: keyword,
+                value: keyword,
+                meta: "keyword",
+                score: 1000,
+                type: "keyword"
+            });
+        });
+
+        Object.entries(completions.snippets).forEach(([name, snippet]) => {
+            completionList.push({
+                caption: name,
+                value: snippet,
+                meta: "snippet",
+                score: 900,
+                type: "snippet"
+            });
+        });
+        completions.variables.forEach(variable => {
+            completionList.push({
+                caption: variable,
+                value: variable,
+                meta: "variable",
+                score: 800,
+                type: "variable"
+            });
+        });
+
+        callback(null, completionList);
+    }
+};
+
 function setupAutoComplete(enabled) {
     editor.setOptions({
         enableBasicAutocompletion: enabled,
         enableLiveAutocompletion: enabled
     });
+    if (enabled) {
+        editor.completers = [lumenlangCompleter];
+    } else {
+        editor.completers = [];
+    }
 }
 
 function setupSuggestions(enabled) {
     editor.setOptions({
         enableSnippets: enabled
     });
+    if (editor.getOption('enableBasicAutocompletion') || editor.getOption('enableLiveAutocompletion')) {
+        editor.completers = [lumenlangCompleter];
+    }
 }
 
 document.getElementById('autoCompleteSelect').addEventListener('change', (e) => {
@@ -589,46 +571,6 @@ document.getElementById('suggestionsSelect').addEventListener('change', (e) => {
     saveSettings({ suggestions: enabled });
 });
 
-const lumenlangCompleter = {
-    getCompletions: function(editor, session, pos, prefix, callback) {
-        const completionList = [];
-        
-        completions.keywords.forEach(keyword => {
-            completionList.push({
-                caption: keyword,
-                value: keyword,
-                meta: "keyword",
-                score: 100
-            });
-        });
-
-        Object.entries(completions.snippets).forEach(([name, snippet]) => {
-            completionList.push({
-                caption: name,
-                value: snippet,
-                meta: "snippet",
-                score: 90
-            });
-        });
-
-        completions.variables.forEach(variable => {
-            completionList.push({
-                caption: variable,
-                value: variable,
-                meta: "variable",
-                score: 80
-            });
-        });
-
-        callback(null, completionList);
-    }
-};
-
-editor.completers = [lumenlangCompleter];
-
-editor.setBehavioursEnabled(true);
-editor.getSession().setOption("useWorker", true);
-
 editor.getSession().on('change', function() {
     const content = editor.getValue();
     const setMatches = content.match(/SET\s+([a-zA-Z_]\w*)/g);
@@ -640,5 +582,5 @@ editor.getSession().on('change', function() {
     }
 });
 
-editor.getSession().setOption("useWorker", true);
 editor.session.setMode("ace/mode/lumen");
+setupAutoComplete(true);
