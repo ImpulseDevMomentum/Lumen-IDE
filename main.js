@@ -266,3 +266,23 @@ ipcMain.handle('open-docs', async () => {
     await shell.openExternal(docsUrl);
     return { success: true };
 });
+
+ipcMain.handle('load-themes', async () => {
+    try {
+        const themesDir = path.join(__dirname, 'themes');
+        const themeFiles = fs.readdirSync(themesDir).filter(file => file.endsWith('.json'));
+        
+        const themes = {};
+        for (const file of themeFiles) {
+            const themePath = path.join(themesDir, file);
+            const themeContent = fs.readFileSync(themePath, 'utf8');
+            const theme = JSON.parse(themeContent);
+            themes[theme.name] = theme;
+        }
+        
+        return themes;
+    } catch (error) {
+        console.error('Error loading themes:', error);
+        return { error: error.message };
+    }
+});
