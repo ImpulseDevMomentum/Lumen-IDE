@@ -386,7 +386,9 @@ window.electron.ipcRenderer.on('console-output', (text) => {
         console.scrollTop = console.scrollHeight;
 
         if (text.includes('input> ') || text.includes('input_int> ')) {
+            const consoleInput = document.querySelector('.console-input');
             consoleInput.style.display = 'block';
+            const inputField = consoleInput.querySelector('.console-input-field');
             inputField.focus();
         }
     } catch (error) {
@@ -606,3 +608,35 @@ editor.getSession().on('change', function() {
 
 editor.session.setMode("ace/mode/lumen");
 setupAutoComplete(true);
+
+const consoleContainer = document.querySelector('.console-container');
+const consoleInput = document.createElement('div');
+consoleInput.className = 'console-input';
+consoleInput.style.display = 'none';
+consoleInput.innerHTML = `
+    <span class="input-prompt">&gt;</span>
+    <input type="text" class="console-input-field" />
+`;
+consoleContainer.appendChild(consoleInput);
+
+const inputField = consoleInput.querySelector('.console-input-field');
+
+inputField.addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter') {
+        const text = inputField.value;
+        console.innerHTML += text + '\n';
+        try {
+            await window.electron.ipcRenderer.invoke('console-input', text);
+        } catch (error) {
+            console.innerHTML += `Error: ${error.message}\n`;
+        }
+        inputField.value = '';
+        consoleInput.style.display = 'none';
+        console.scrollTop = console.scrollHeight;
+    }
+});
+
+window.electron.ipcRenderer.on('input-requested', () => {
+    consoleInput.style.display = 'block';
+    inputField.focus();
+});
