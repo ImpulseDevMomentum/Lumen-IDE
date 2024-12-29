@@ -1,0 +1,10 @@
+{
+    "name": "violet_twilight",
+    "editorTheme": "ace/theme/merbivore_soft",
+    "background": "#251a40",
+    "foreground": "#b197cf",
+    "consoleBackground": "#1f1433",
+    "consoleForeground": "#9f82bc",
+    "menuBackground": "#251a40",
+    "menuForeground": "#b197cf"
+} 

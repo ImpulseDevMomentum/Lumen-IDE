@@ -1,0 +1,8 @@
+{
+    "name": "dark",
+    "editorTheme": "ace/theme/monokai",
+    "background": "#282c34",
+    "foreground": "#abb2bf",
+    "consoleBackground": "#21252b",
+    "consoleForeground": "#98c379"
+} 

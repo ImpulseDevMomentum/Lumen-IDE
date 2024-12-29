@@ -1,0 +1,10 @@
+{
+    "name": "github_dark",
+    "editorTheme": "ace/theme/dracula",
+    "background": "#0d1117",
+    "foreground": "#c9d1d9",
+    "consoleBackground": "#161b22",
+    "consoleForeground": "#8b949e",
+    "menuBackground": "#161b22",
+    "menuForeground": "#c9d1d9"
+} 

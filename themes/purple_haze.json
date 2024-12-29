@@ -1,0 +1,10 @@
+{
+    "name": "purple_haze",
+    "editorTheme": "ace/theme/twilight",
+    "background": "#2e1a47",
+    "foreground": "#d1bfe2",
+    "consoleBackground": "#27163a",
+    "consoleForeground": "#b39dd8",
+    "menuBackground": "#2e1a47",
+    "menuForeground": "#d1bfe2"
+} 
