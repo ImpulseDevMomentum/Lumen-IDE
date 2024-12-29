@@ -1678,12 +1678,16 @@ class String(Value):
   def formatted(self, exec_ctx):
     try:
         result = self.value
+        
         if '{' in result and '}' in result:
-            current_ctx = exec_ctx
             variables = {}
+            current_ctx = exec_ctx
             while current_ctx:
                 variables.update(current_ctx.symbol_table.symbols)
                 current_ctx = current_ctx.parent
+
+            result = result.replace('{{', '###LEFTBRACE###')
+            result = result.replace('}}', '###RIGHTBRACE###')
 
             matches = re.finditer(r'\{([^}]+)\}', result)
             replacements = []
@@ -1692,45 +1696,26 @@ class String(Value):
                 full_match = match.group(0)
                 placeholder = match.group(1)
                 
-                if ':' in placeholder:
-                    var_name, format_spec = placeholder.split(':')
-                    var_value = variables.get(var_name)
-                    if var_value is None:
-                        return None, RTError(
-                            self.pos_start, self.pos_end,
-                            f"Variable '{var_name}' is not defined",
-                            exec_ctx
-                        )
-                    
-                    if isinstance(var_value, Number):
-                        if format_spec.endswith('f'):
-                            try:
-                                precision = int(format_spec[1:-1])
-                                formatted_value = f"{float(var_value.value):.{precision}f}"
-                            except:
-                                formatted_value = str(var_value.value)
-                        else:
-                            formatted_value = str(var_value.value)
-                    else:
-                        formatted_value = str(var_value)
-                    replacements.append((full_match, formatted_value))
+                var_value = variables.get(placeholder)
+                if var_value is None:
+                    return None, RTError(
+                        self.pos_start, self.pos_end,
+                        f"Variable '{placeholder}' is not defined",
+                        exec_ctx
+                    )
+                
+                if isinstance(var_value, Number):
+                    formatted_value = str(var_value.value)
                 else:
-                    var_value = variables.get(placeholder)
-                    if var_value is None:
-                        return None, RTError(
-                            self.pos_start, self.pos_end,
-                            f"Variable '{placeholder}' is not defined",
-                            exec_ctx
-                        )
-                    if isinstance(var_value, Number):
-                        formatted_value = str(var_value.value)
-                    else:
-                        formatted_value = str(var_value)
-                    replacements.append((full_match, formatted_value))
+                    formatted_value = str(var_value)
+                replacements.append((full_match, formatted_value))
             
             for old, new in replacements:
                 result = result.replace(old, new)
-                
+
+            result = result.replace('###LEFTBRACE###', '{')
+            result = result.replace('###RIGHTBRACE###', '}')
+        
         return String(result).set_context(self.context), None
     except Exception as e:
         return None, RTError(
