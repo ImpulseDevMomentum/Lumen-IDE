@@ -309,3 +309,15 @@ button:active {
 .toolbar-button i {
     font-size: 16px;
 }
+
+.ace_string {
+    color: #98c379 !important;
+}
+
+.ace_variable {
+    color: #61afef !important;
+}
+
+.ace_string.ace_escaped {
+    color: #c678dd !important;
+}
