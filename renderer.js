@@ -30,13 +30,9 @@ define('ace/mode/lumen_highlight_rules', function(require, exports, module) {
                     regex: "\\b(NULL|TRUE|FALSE|MATH_PI|MATH_E|MATH_TAU)\\b"
                 },
                 {
-                    token: ["string", "variable", "string"],
-                    regex: '(".*?)({[^}]+})(.*?")',
-                    merge: false
-                },
-                {
                     token: "string",
-                    regex: '".*?"'
+                    regex: '"',
+                    next: "string"
                 },
                 {
                     token: "constant.numeric",
@@ -57,6 +53,33 @@ define('ace/mode/lumen_highlight_rules', function(require, exports, module) {
                 {
                     token: "string.formatting",
                     regex: ":\\d*\\.?\\d*f"
+                }
+            ],
+            "string": [
+                {
+                    token: "string.escaped",
+                    regex: "{{[^}]+}}|{{}}",
+                    onMatch: function(val) {
+                        return "string.escaped";
+                    }
+                },
+                {
+                    token: "variable",
+                    regex: "{[^{}]+}|{}",
+                    onMatch: function(val) {
+                        if (val.startsWith("{{")) {
+                            return "string.escaped";
+                        }
+                        return "variable";
+                    }
+                },
+                {
+                    token: "string",
+                    regex: '"',
+                    next: "start"
+                },
+                {
+                    defaultToken: "string"
                 }
             ]
         };
