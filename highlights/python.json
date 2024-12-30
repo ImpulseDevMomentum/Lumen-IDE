@@ -1,0 +1,14 @@
+{
+    "name": "python",
+    "rules": {
+        "keyword": "#FF8400",
+        "constant.language": "#0086B3",
+        "string": "#36C64B",
+        "variable": "#79C0FF",
+        "string.escaped": "#FF5C8F",
+        "numeric": "#098658",
+        "comment": "#6A737D",
+        "operator": "#FF8400",
+        "function": "#DCDCAA"
+    }
+} 

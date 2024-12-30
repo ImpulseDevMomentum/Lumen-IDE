@@ -1,0 +1,14 @@
+{
+    "name": "lumen",
+    "rules": {
+        "keyword": "#c678dd",
+        "constant.language": "#d19a66",
+        "string": "#98c379",
+        "variable": "#61afef",
+        "string.escaped": "#c678dd",
+        "numeric": "#d19a66",
+        "comment": "#7f848e",
+        "operator": "#56b6c2",
+        "function": "#61afef"
+    }
+} 
