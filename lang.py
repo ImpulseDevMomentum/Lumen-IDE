@@ -1914,9 +1914,9 @@ class BuiltInFunction(BaseFunction):
                 "Prompt must be a string",
                 exec_ctx
             ))
-        text = input(f"{prompt.value}input> ")  # Dodane "input> "
+        text = input(f"{prompt.value}input> ")
     else:
-        text = input("input> ")  # Dodane "input> "
+        text = input("input> ")
     return RTResult().success(String(text))
   execute_input.arg_names = ["prompt"]
 
@@ -1933,9 +1933,9 @@ class BuiltInFunction(BaseFunction):
     while True:
         try:
             if prompt:
-                text = input(f"{prompt.value}input_int> ")  # Dodane "input_int> "
+                text = input(f"{prompt.value}input_int> ")
             else:
-                text = input("input_int> ")  # Dodane "input_int> "
+                text = input("input_int> ")
             number = int(text)
             break
         except ValueError:
