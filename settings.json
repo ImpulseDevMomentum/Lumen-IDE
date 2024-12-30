@@ -9,5 +9,6 @@
   "cursor_style": "ace",
   "auto_complete": true,
   "auto_pairs": true,
-  "suggestions": false
+  "suggestions": false,
+  "highlight": "lumen"
 }
