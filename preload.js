@@ -3,7 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld('electron', {
     ipcRenderer: {
         invoke: (channel, data) => {
-            const validChannels = ['open-file', 'save-file', 'run-code', 'stop-code', 'console-input', 'save-settings', 'load-settings']
+            const validChannels = ['open-file', 'save-file', 'run-code', 'stop-code', 'console-input', 'save-settings', 'load-settings', 'load-themes', 'load-highlights', 'open-docs']
             if (validChannels.includes(channel)) {
                 return ipcRenderer.invoke(channel, data)
             }
