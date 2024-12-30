@@ -127,7 +127,7 @@ ipcMain.handle('open-file', async () => {
         properties: ['openFile'],
         filters: [
             { name: 'Lumen Files', extensions: ['lum'] },
-            { name: 'All Files', extensions: ['*'] }
+            { name: 'Lumen Files', extensions: ['lum'] }
         ]
     })
     
