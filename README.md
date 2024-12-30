@@ -19,6 +19,7 @@ It was based on this tutorial: https://www.youtube.com/watch?v=Eythq9848Fg&list=
 
 > 🔗 Useful Links: <br>
 Lumen: https://github.com/ImpulseDevMomentum/Lumen <br>
+Docs: https://lumenlang.gitbook.io/lumen-docs <br>
 Wish Logger PY: https://github.com/ImpulseDevMomentum/WishLoggerPY <br>
 Wish Logger JS: https://github.com/ImpulseDevMomentum/WishLoggerJS <br>
 FuzeMC: https://github.com/ImpulseDevMomentum/fuzemc <br>
