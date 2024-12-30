@@ -640,3 +640,68 @@ window.electron.ipcRenderer.on('input-requested', () => {
     consoleInput.style.display = 'block';
     inputField.focus();
 });
+
+let highlights = {};
+
+async function loadHighlights() {
+    try {
+        highlights = await window.electron.ipcRenderer.invoke('load-highlights');
+        if (highlights.error) {
+            console.error('Error loading highlights:', highlights.error);
+            return;
+        }
+        
+        const highlightSelect = document.getElementById('highlightSelect');
+        highlightSelect.innerHTML = '';
+        
+        Object.keys(highlights).forEach(highlightName => {
+            const option = document.createElement('option');
+            option.value = highlightName;
+            option.textContent = highlightName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            highlightSelect.appendChild(option);
+        });
+        
+        const settings = await window.electron.ipcRenderer.invoke('load-settings');
+        const highlightName = settings?.highlight || 'lumen';
+        if (highlights[highlightName]) {
+            applyHighlight(highlightName);
+            highlightSelect.value = highlightName;
+        }
+    } catch (error) {
+        console.error('Error initializing highlights:', error);
+    }
+}
+
+function applyHighlight(highlightName) {
+    const highlight = highlights[highlightName];
+    if (!highlight) return;
+
+    let styleEl = document.getElementById('highlight-styles');
+    if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'highlight-styles';
+        document.head.appendChild(styleEl);
+    }
+
+    styleEl.textContent = `
+        .ace_keyword { color: ${highlight.rules.keyword} !important; }
+        .ace_constant.ace_language { color: ${highlight.rules["constant.language"]} !important; }
+        .ace_string { color: ${highlight.rules.string} !important; }
+        .ace_variable { color: ${highlight.rules.variable} !important; }
+        .ace_string.ace_escaped { color: ${highlight.rules["string.escaped"]} !important; }
+        .ace_constant.ace_numeric { color: ${highlight.rules.numeric} !important; }
+        .ace_comment { color: ${highlight.rules.comment} !important; }
+        .ace_keyword.ace_operator { color: ${highlight.rules.operator} !important; }
+        .ace_support.ace_function { color: ${highlight.rules.function} !important; }
+    `;
+}
+
+document.getElementById('highlightSelect').addEventListener('change', async (e) => {
+    const highlightName = e.target.value;
+    if (highlights[highlightName]) {
+        applyHighlight(highlightName);
+        saveSettings({ highlight: highlightName });
+    }
+});
+
+loadHighlights();
