@@ -286,3 +286,23 @@ ipcMain.handle('load-themes', async () => {
         return { error: error.message };
     }
 });
+
+ipcMain.handle('load-highlights', async () => {
+    try {
+        const highlightsDir = path.join(__dirname, 'highlights');
+        const highlightFiles = fs.readdirSync(highlightsDir).filter(file => file.endsWith('.json'));
+        
+        const highlights = {};
+        for (const file of highlightFiles) {
+            const highlightPath = path.join(highlightsDir, file);
+            const highlightContent = fs.readFileSync(highlightPath, 'utf8');
+            const highlight = JSON.parse(highlightContent);
+            highlights[highlight.name] = highlight;
+        }
+        
+        return highlights;
+    } catch (error) {
+        console.error('Error loading highlights:', error);
+        return { error: error.message };
+    }
+});
