@@ -8,6 +8,8 @@ const { autoUpdater } = require('electron-updater')
 let mainWindow
 let runningProcess = null
 
+const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+
 async function checkForUpdates() {
     const versionUrl = 'https://raw.githubusercontent.com/ImpulseDevMomentum/Lumen/main/version.json'
     const filesMap = {
@@ -167,7 +169,9 @@ ipcMain.handle('run-code', async (event, filePath) => {
             return { error: "Please save your file before running." };
         }
 
-        const shellPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'shell.py');
+        const shellPath = isDev 
+            ? path.join(__dirname, 'shell.py')
+            : path.join(process.resourcesPath, 'app.asar.unpacked', 'shell.py');
         
         runningProcess = spawn(process.platform === 'win32' ? 'python' : 'python3', [shellPath, filePath], {
             env: { 
@@ -311,13 +315,17 @@ ipcMain.handle('load-highlights', async () => {
 });
 
 ipcMain.handle('open-themes-folder', async () => {
-    const themesPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'themes');
+    const themesPath = isDev 
+        ? path.join(__dirname, 'themes')
+        : path.join(process.resourcesPath, 'app.asar.unpacked', 'themes');
     await shell.openPath(themesPath);
     return { success: true };
 });
 
 ipcMain.handle('open-highlights-folder', async () => {
-    const highlightsPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'highlights');
+    const highlightsPath = isDev 
+        ? path.join(__dirname, 'highlights')
+        : path.join(process.resourcesPath, 'app.asar.unpacked', 'highlights');
     await shell.openPath(highlightsPath);
     return { success: true };
 });
