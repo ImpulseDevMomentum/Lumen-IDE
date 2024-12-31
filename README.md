@@ -1,19 +1,62 @@
-Special IDE created only for coding with `Lumen`
+# 🚀 Lumen IDE
 
-This "language" was "created" for school purposes. Because of that, it is very, very simple, so please don't try to code next Cyberpunk. 
-It was based on this tutorial: https://www.youtube.com/watch?v=Eythq9848Fg&list=PLZQftyCk7_SdoVexSmwy_tBgs7P0b97yD&index by CodePulse.
+A modern, lightweight IDE designed specifically for the Lumen programming language. Built with Electron and featuring a clean, intuitive interface.
 
-> and some syntax differences! (in Lumen):
+## ✨ Features
 
-- instead of `ELIF` you have `OTHER` <br>
-- instead of `RETURN` you have `BACK` <br>
-- instead of `END` you have `STOP` <br>
-- instead of `FUN/DEF` you have `FUNC` <br>
-- instead of `VAR` you have `SET` <br>
+### 💻 Code Editor
+- Syntax Highlighting for Lumen language
+- Auto-completion
+- Multiple Built-in Themes
+- Real-time Error Detection
 
-> 🔗 Useful Links: <br>
-Lumen: https://github.com/ImpulseDevMomentum/Lumen <br>
-Docs: https://lumenlang.gitbook.io/lumen-docs <br>
-Wish Logger PY: https://github.com/ImpulseDevMomentum/WishLoggerPY <br>
-Wish Logger JS: https://github.com/ImpulseDevMomentum/WishLoggerJS <br>
-FuzeMC: https://github.com/ImpulseDevMomentum/fuzemc <br>
+### 🔧 Customization
+- Theme Editor
+- Syntax Highlighting Editor
+- Configurable Settings
+
+### 📝 Development Tools
+- Integrated Console
+- Real-time Output
+- Interactive Mode
+- Python Integration
+
+### 📂 File Management
+- Quick Save/Open
+- Auto-save Feature
+- Keyboard Shortcuts
+
+## 🛠️ System Requirements
+- Windows 10 or newer
+- Python 3.8+
+- 4GB RAM minimum
+- 500MB free disk space
+
+## 📥 Installation
+
+### Installer Version
+1. Download `Lumen IDE Setup-1.0.0.exe`
+2. Run the installer
+3. Start coding!
+
+### Portable Version
+- Download `Lumen IDE Portable-1.0.0.exe`
+- Run directly - no installation needed
+
+## ⌨️ Keyboard Shortcuts
+| Action | Shortcut |
+|--------|----------|
+| New File | Ctrl + N |
+| Open File | Ctrl + O |
+| Save | Ctrl + S |
+| Run Code | F5 |
+| Toggle Console | Ctrl + J |
+
+## 🤝 Contributing
+We welcome contributions! Feel free to report bugs, suggest features, or submit pull requests.
+
+## 📄 License
+MIT License - see LICENSE file for details
+
+---
+Made with ❤️ by ImpulseDev
