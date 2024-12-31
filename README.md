@@ -58,5 +58,11 @@ We welcome contributions! Feel free to report bugs, suggest features, or submit 
 ## 📄 License
 MIT License - see LICENSE file for details
 
+## 🔗 Links
+Lumen: https://github.com/ImpulseDevMomentum/Lumen <br>
+Docs: https://lumenlang.gitbook.io/lumen-docs <br>
+Wish Logger JS: https://github.com/ImpulseDevMomentum/WishLoggerJS <br>
+Wish Logger PY: https://github.com/ImpulseDevMomentum/WishLoggerPY <br>
+
 ---
-Made with ❤️ by ImpulseDev
+Made with ❤️ by Impulse
