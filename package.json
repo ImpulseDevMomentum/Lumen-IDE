@@ -4,7 +4,7 @@
   "description": "IDE for Lumen programming language",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "set NODE_ENV=development && electron .",
     "build": "electron-builder"
   },
   "build": {
