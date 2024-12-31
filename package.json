@@ -30,15 +30,19 @@
     "win": {
       "target": ["nsis", "portable"],
       "icon": "./assets/images/icon.ico",
-      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "artifactName": "${productName} Setup-${version}.${ext}",
       "publisherName": "ImpulseDev"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
+      "artifactName": "${productName} Setup-${version}.${ext}",
       "uninstallDisplayName": "${productName}",
       "license": "LICENSE"
+    },
+    "portable": {
+      "artifactName": "${productName} Portable-${version}.${ext}"
     },
     "files": [
       "**/*",
