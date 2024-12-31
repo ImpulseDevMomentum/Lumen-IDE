@@ -39,7 +39,18 @@
             View
             <div class="dropdown" id="viewMenu">
                 <div class="dropdown-item" onclick="toggleConsole()">
-                    <i class="material-icons">terminal</i> Toggle Console (Ctrl+J)
+                    <i class="material-icons">terminal</i>
+                    Toggle Console
+                    <span class="shortcut">Ctrl+J</span>
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item" onclick="window.electron.ipcRenderer.invoke('open-themes-folder')">
+                    <i class="material-icons">folder</i>
+                    Open Themes Folder
+                </div>
+                <div class="dropdown-item" onclick="window.electron.ipcRenderer.invoke('open-highlights-folder')">
+                    <i class="material-icons">folder</i>
+                    Open Highlights Folder
                 </div>
                 <div class="dropdown-divider"></div>
                 <div class="dropdown-item">
