@@ -1,13 +1,57 @@
 {
   "name": "lumen-ide",
   "version": "1.0.0",
-  "description": "Lumen IDE",
+  "description": "IDE for Lumen programming language",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "install-deps": "npm install"
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.impulsedev.lumenide",
+    "productName": "Lumen IDE",
+    "publish": {
+      "provider": "github",
+      "owner": "ImpulseDev",
+      "repo": "Lumen-IDE"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "**/*.{node,dll,exe}",
+      "**/lang.py",
+      "**/shell.py",
+      "**/errorcomp.py",
+      "themes/**/*",
+      "highlights/**/*"
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "./assets/images/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "publisherName": "ImpulseDev"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "uninstallDisplayName": "${productName}",
+      "license": "LICENSE"
+    },
+    "files": [
+      "**/*",
+      "!Website{,/**/*}"
+    ]
+  },
+  "author": "ImpulseDev",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
   },
   "dependencies": {
-    "electron": "^28.3.3"
+    "electron-updater": "^6.3.9"
   }
 }
