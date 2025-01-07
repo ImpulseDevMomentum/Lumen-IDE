@@ -1,0 +1,20 @@
+{
+  "name": "original",
+  "editorTheme": "ace/theme/monokai",
+  "background": "#000000",
+  "foreground": "#ff0000",
+  "consoleBackground": "#000000",
+  "consoleForeground": "#ff0000",
+  "menuBackground": "#000000",
+  "menuForeground": "#ff0000",
+  "explorerBackground": "#0A0A0A",
+  "explorerForeground": "#ff0000",
+  "explorerHeaderBackground": "#050505",
+  "explorerActiveBackground": "#1A1A1A",
+  "explorerHoverBackground": "#151515",
+  "tabsBackground": "#0A0A0A",
+  "tabBackground": "#151515",
+  "tabActiveBackground": "#1A1A1A",
+  "tabHoverBackground": "#202020",
+  "tabBorderColor": "#303030"
+}

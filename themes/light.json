@@ -1,0 +1,20 @@
+{
+    "name": "light",
+    "editorTheme": "ace/theme/chrome",
+    "background": "#ffffff",
+    "foreground": "#383a42",
+    "consoleBackground": "#f0f0f0",
+    "consoleForeground": "#383a42",
+    "menuBackground": "#f5f5f5",
+    "menuForeground": "#383a42",
+    "explorerBackground": "#f5f5f5",
+    "explorerForeground": "#383a42",
+    "explorerHeaderBackground": "#ebebeb",
+    "explorerActiveBackground": "#e1e1e1",
+    "explorerHoverBackground": "#e8e8e8",
+    "tabsBackground": "#f5f5f5",
+    "tabBackground": "#ebebeb",
+    "tabActiveBackground": "#e1e1e1",
+    "tabHoverBackground": "#e8e8e8",
+    "tabBorderColor": "#dddddd"
+} 

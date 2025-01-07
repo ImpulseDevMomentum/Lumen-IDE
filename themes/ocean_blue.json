@@ -1,0 +1,20 @@
+{
+    "name": "ocean_blue",
+    "editorTheme": "ace/theme/cobalt",
+    "background": "#1B2B34",
+    "foreground": "#CDD3DE",
+    "consoleBackground": "#0F1C23",
+    "consoleForeground": "#5FB3B3",
+    "menuBackground": "#0F1C23",
+    "menuForeground": "#CDD3DE",
+    "explorerBackground": "#162830",
+    "explorerForeground": "#CDD3DE",
+    "explorerHeaderBackground": "#12222A",
+    "explorerActiveBackground": "#1D333D",
+    "explorerHoverBackground": "#1A2F38",
+    "tabsBackground": "#162830",
+    "tabBackground": "#1B2B34",
+    "tabActiveBackground": "#1D333D",
+    "tabHoverBackground": "#1A2F38",
+    "tabBorderColor": "#12222A"
+}

@@ -1,0 +1,20 @@
+{
+    "name": "violet_twilight",
+    "editorTheme": "ace/theme/merbivore_soft",
+    "background": "#251a40",
+    "foreground": "#b197cf",
+    "consoleBackground": "#1f1433",
+    "consoleForeground": "#9f82bc",
+    "menuBackground": "#251a40",
+    "menuForeground": "#b197cf",
+    "explorerBackground": "#201636",
+    "explorerForeground": "#b197cf",
+    "explorerHeaderBackground": "#1b122e",
+    "explorerActiveBackground": "#2d1f4d",
+    "explorerHoverBackground": "#271a45",
+    "tabsBackground": "#201636",
+    "tabBackground": "#251a40",
+    "tabActiveBackground": "#2d1f4d",
+    "tabHoverBackground": "#271a45",
+    "tabBorderColor": "#1b122e"
+} 

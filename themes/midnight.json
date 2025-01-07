@@ -1,0 +1,20 @@
+{
+    "name": "midnight",
+    "editorTheme": "ace/theme/cobalt",
+    "background": "#000C18",
+    "foreground": "#6688CC",
+    "consoleBackground": "#002240",
+    "consoleForeground": "#FFFFFF",
+    "menuBackground": "#002240",
+    "menuForeground": "#6688CC",
+    "explorerBackground": "#001B33",
+    "explorerForeground": "#6688CC",
+    "explorerHeaderBackground": "#001629",
+    "explorerActiveBackground": "#002952",
+    "explorerHoverBackground": "#002240",
+    "tabsBackground": "#001B33",
+    "tabBackground": "#002240",
+    "tabActiveBackground": "#002952",
+    "tabHoverBackground": "#002240",
+    "tabBorderColor": "#001629"
+} 
