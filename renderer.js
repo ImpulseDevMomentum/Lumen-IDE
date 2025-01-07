@@ -139,17 +139,39 @@ function applyTheme(themeName) {
     document.body.style.backgroundColor = theme.background;
     document.body.style.color = theme.foreground;
     
+    // Console theming
     const consoleEl = document.getElementById('console');
     const consoleContainer = document.querySelector('.console-container');
-    
     consoleEl.style.backgroundColor = theme.consoleBackground;
     consoleEl.style.color = theme.consoleForeground;
     consoleContainer.style.backgroundColor = theme.consoleBackground;
     
+    // Explorer theming
+    const explorer = document.querySelector('.file-explorer');
+    const explorerHeader = document.querySelector('.file-explorer-header');
+    const explorerContent = document.querySelector('.file-explorer-content');
+    
+    explorer.style.backgroundColor = theme.explorerBackground;
+    explorer.style.color = theme.explorerForeground;
+    explorerHeader.style.backgroundColor = theme.explorerHeaderBackground;
+    explorerContent.style.backgroundColor = theme.explorerBackground;
+    
+    // Update CSS variables for explorer items
+    document.documentElement.style.setProperty('--explorer-active-bg', theme.explorerActiveBackground);
+    document.documentElement.style.setProperty('--explorer-hover-bg', theme.explorerHoverBackground);
+    
+    // Menu theming
     document.querySelector('.menu-bar').style.backgroundColor = theme.menuBackground || theme.background;
     document.querySelectorAll('.dropdown').forEach(dropdown => {
         dropdown.style.backgroundColor = theme.menuBackground || theme.background;
     });
+    
+    // Add tab theming
+    document.documentElement.style.setProperty('--tabs-background', theme.tabsBackground);
+    document.documentElement.style.setProperty('--tab-background', theme.tabBackground);
+    document.documentElement.style.setProperty('--tab-active-background', theme.tabActiveBackground);
+    document.documentElement.style.setProperty('--tab-hover-background', theme.tabHoverBackground);
+    document.documentElement.style.setProperty('--tab-border-color', theme.tabBorderColor);
 }
 
 loadThemes();
@@ -277,23 +299,145 @@ async function loadSettings() {
 
 loadSettings();
 
-async function openFile() {
+let openTabs = [];
+let activeTab = null;
+
+function createTab(filePath, content) {
+    const tab = {
+        path: filePath,
+        name: filePath.split('\\').pop(),
+        content: content,
+        lastSavedContent: content
+    };
+
+    const existingTabIndex = openTabs.findIndex(t => t.path === filePath);
+    if (existingTabIndex !== -1) {
+        openTabs[existingTabIndex].content = editor.getValue();
+        activeTab = openTabs[existingTabIndex];
+        renderTabs();
+        return;
+    }
+
+    openTabs.push(tab);
+    activeTab = tab;
+    renderTabs();
+}
+
+function closeTab(tabPath, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    const tabIndex = openTabs.findIndex(t => t.path === tabPath);
+    if (tabIndex === -1) return;
+
+    openTabs.splice(tabIndex, 1);
+
+    if (activeTab.path === tabPath) {
+        activeTab = openTabs[Math.min(tabIndex, openTabs.length - 1)] || null;
+        if (activeTab) {
+            editor.setValue(activeTab.content, -1);
+            currentFilePath = activeTab.path;
+        } else {
+            editor.setValue('', -1);
+            currentFilePath = null;
+        }
+    }
+
+    renderTabs();
+}
+
+function switchTab(tab) {
+    if (activeTab) {
+        activeTab.content = editor.getValue();
+    }
+
+    activeTab = tab;
+    editor.setValue(tab.content || tab.lastSavedContent, -1);
+    currentFilePath = tab.path;
+    renderTabs();
+
+    document.querySelectorAll('.file-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.path === tab.path) {
+            item.classList.add('active');
+        }
+    });
+}
+
+function renderTabs() {
+    const container = document.getElementById('tabsContainer');
+    container.innerHTML = '';
+
+    openTabs.forEach(tab => {
+        const tabElement = document.createElement('div');
+        tabElement.className = `tab ${activeTab && activeTab.path === tab.path ? 'active' : ''}`;
+        tabElement.innerHTML = `
+            <span class="tab-title">${tab.name}</span>
+            <i class="material-icons tab-close">close</i>
+        `;
+        
+        tabElement.onclick = () => switchTab(tab);
+        tabElement.querySelector('.tab-close').onclick = (e) => closeTab(tab.path, e);
+        
+        container.appendChild(tabElement);
+    });
+}
+
+async function openFile(filePath) {
+    const result = await window.electron.ipcRenderer.invoke('open-file', filePath);
+    if (result) {
+        currentFilePath = result.path;
+        createTab(result.path, result.content);
+        editor.setValue(result.content, -1);
+        
+        document.querySelectorAll('.file-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        const fileItem = document.querySelector(`.file-item[data-path="${filePath}"]`);
+        if (fileItem) {
+            fileItem.classList.add('active');
+        }
+    }
+}
+
+async function openFileDialog() {
     const result = await window.electron.ipcRenderer.invoke('open-file');
     if (result) {
         currentFilePath = result.path;
+        createTab(result.path, result.content);
         editor.setValue(result.content, -1);
-        editor.session.getUndoManager().reset();
+        
+        const currentFolder = await window.electron.ipcRenderer.invoke('get-current-folder');
+        if (currentFolder) {
+            refreshExplorer();
+        }
     }
 }
 
 async function saveFile() {
-    const content = editor.getValue();
-    const path = await window.electron.ipcRenderer.invoke('save-file', {
-        path: currentFilePath,
-        content
-    });
-    if (path) {
-        currentFilePath = path;
+    try {
+        if (!currentFilePath) {
+            return await saveFileAs();
+        }
+
+        const currentContent = editor.getValue();
+        const result = await window.electron.ipcRenderer.invoke('save-file', {
+            path: currentFilePath,
+            content: currentContent
+        });
+
+        if (result) {
+            currentFilePath = result;
+            if (activeTab) {
+                activeTab.content = currentContent;
+                activeTab.lastSavedContent = currentContent;
+            }
+            return result;
+        }
+    } catch (error) {
+        console.error('Error saving file:', error);
     }
 }
 
@@ -407,25 +551,21 @@ window.electron.ipcRenderer.on('console-error', (text) => {
 });
 
 document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.key === 'n') {
+    if (e.ctrlKey && !e.shiftKey && e.key === 'n') {
         e.preventDefault();
         newFile();
-    }
-    if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+    } else if (e.ctrlKey && !e.shiftKey && e.key === 'o') {
         e.preventDefault();
-        saveFileAs();
-    }
-    if (e.ctrlKey && e.key === 'j') {
-        e.preventDefault();
-        toggleConsole();
-    }
-    if (e.ctrlKey && e.key === 's') {
+        openFileDialog();
+    } else if (e.ctrlKey && !e.shiftKey && e.key === 's') {
         e.preventDefault();
         saveFile();
-    }
-    if (e.ctrlKey && e.key === 'o') {
+    } else if (e.ctrlKey && e.shiftKey && e.key === 'S') {
         e.preventDefault();
-        openFile();
+        saveFileAs();
+    } else if (e.ctrlKey && e.shiftKey && e.key === 'O') {
+        e.preventDefault();
+        openFolder();
     }
     if (e.key === 'F5') {
         e.preventDefault();
@@ -705,3 +845,120 @@ document.getElementById('highlightSelect').addEventListener('change', async (e) 
 });
 
 loadHighlights();
+
+let expandedFolders = new Set();
+
+async function openFolder() {
+    const result = await window.electron.ipcRenderer.invoke('open-folder');
+    if (result && !result.error) {
+        renderFileExplorer(result);
+    }
+}
+
+async function refreshExplorer() {
+    const currentFolder = await window.electron.ipcRenderer.invoke('get-current-folder');
+    if (currentFolder) {
+        const result = await window.electron.ipcRenderer.invoke('read-directory', currentFolder);
+        if (result && !result.error) {
+            renderFileExplorer(result);
+        }
+    }
+}
+
+async function toggleFolder(folderPath, element) {
+    const folderContent = element.nextElementSibling;
+    
+    if (expandedFolders.has(folderPath)) {
+        expandedFolders.delete(folderPath);
+        element.querySelector('i').textContent = 'folder';
+        if (folderContent) {
+            folderContent.remove();
+        }
+    } else {
+        expandedFolders.add(folderPath);
+        element.querySelector('i').textContent = 'folder_open';
+        const result = await window.electron.ipcRenderer.invoke('read-directory', folderPath);
+        if (result && !result.error) {
+            const content = document.createElement('div');
+            content.className = 'folder-content';
+            renderFileItems(result.items, content);
+            element.parentNode.insertBefore(content, element.nextSibling);
+        }
+    }
+}
+
+function renderFileItems(items, container) {
+    items.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = `file-item ${item.type}`;
+        itemElement.dataset.path = item.path;
+        
+        const icon = document.createElement('i');
+        icon.className = 'material-icons';
+        icon.textContent = item.type === 'folder' ? 'folder' : 'description';
+        
+        const name = document.createElement('span');
+        name.textContent = item.name;
+        
+        itemElement.appendChild(icon);
+        itemElement.appendChild(name);
+        
+        if (item.type === 'folder') {
+            itemElement.onclick = (e) => {
+                e.stopPropagation();
+                toggleFolder(item.path, itemElement);
+            };
+        } else {
+            itemElement.onclick = () => openFile(item.path);
+        }
+        
+        container.appendChild(itemElement);
+    });
+}
+
+function renderFileExplorer(data) {
+    const container = document.getElementById('fileExplorerContent');
+    const currentFolderElement = document.getElementById('currentFolder');
+    container.innerHTML = '';
+    
+    if (data.path) {
+        const folderName = data.path.split('\\').pop();
+        currentFolderElement.textContent = folderName;
+    }
+    
+    renderFileItems(data.items, container);
+}
+
+function initializeResizers() {
+    const fileExplorer = document.querySelector('.file-explorer');
+    const resizer = document.querySelector('.file-explorer-resize');
+    
+    let isResizing = false;
+    let startWidth;
+    let startX;
+
+    resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = fileExplorer.offsetWidth;
+        
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', () => {
+            isResizing = false;
+            document.removeEventListener('mousemove', handleMouseMove);
+        });
+    });
+
+    function handleMouseMove(e) {
+        if (!isResizing) return;
+        
+        const newWidth = startWidth + (e.clientX - startX);
+        if (newWidth >= 200 && newWidth <= 400) {
+            fileExplorer.style.width = `${newWidth}px`;
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeResizers();
+});
