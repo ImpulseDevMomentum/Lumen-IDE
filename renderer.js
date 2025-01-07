@@ -139,14 +139,12 @@ function applyTheme(themeName) {
     document.body.style.backgroundColor = theme.background;
     document.body.style.color = theme.foreground;
     
-    // Console theming
     const consoleEl = document.getElementById('console');
     const consoleContainer = document.querySelector('.console-container');
     consoleEl.style.backgroundColor = theme.consoleBackground;
     consoleEl.style.color = theme.consoleForeground;
     consoleContainer.style.backgroundColor = theme.consoleBackground;
     
-    // Explorer theming
     const explorer = document.querySelector('.file-explorer');
     const explorerHeader = document.querySelector('.file-explorer-header');
     const explorerContent = document.querySelector('.file-explorer-content');
@@ -156,17 +154,14 @@ function applyTheme(themeName) {
     explorerHeader.style.backgroundColor = theme.explorerHeaderBackground;
     explorerContent.style.backgroundColor = theme.explorerBackground;
     
-    // Update CSS variables for explorer items
     document.documentElement.style.setProperty('--explorer-active-bg', theme.explorerActiveBackground);
     document.documentElement.style.setProperty('--explorer-hover-bg', theme.explorerHoverBackground);
     
-    // Menu theming
     document.querySelector('.menu-bar').style.backgroundColor = theme.menuBackground || theme.background;
     document.querySelectorAll('.dropdown').forEach(dropdown => {
         dropdown.style.backgroundColor = theme.menuBackground || theme.background;
     });
     
-    // Add tab theming
     document.documentElement.style.setProperty('--tabs-background', theme.tabsBackground);
     document.documentElement.style.setProperty('--tab-background', theme.tabBackground);
     document.documentElement.style.setProperty('--tab-active-background', theme.tabActiveBackground);
@@ -193,15 +188,19 @@ document.querySelector('.resize-handle').addEventListener('mousedown', (e) => {
         isResizing = false;
         document.removeEventListener('mousemove', handleMouseMove);
     });
+    
+    e.preventDefault();
 });
 
 function handleMouseMove(e) {
     if (!isResizing) return;
     
     const consoleContainer = document.querySelector('.console-container');
-    const diff = startY - e.clientY;
-    const newHeight = Math.max(100, Math.min(startHeight + diff, window.innerHeight * 0.8));
-    consoleContainer.style.height = `${newHeight}px`;
+    const newHeight = startHeight + (startY - e.clientY);
+    
+    if (newHeight >= 150 && newHeight <= window.innerHeight * 0.8) {
+        consoleContainer.style.height = `${newHeight}px`;
+    }
 }
 
 document.getElementById('themeSelect').addEventListener('change', (e) => {
@@ -574,6 +573,10 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'F6') {
         e.preventDefault();
         stopCode();
+    }
+    if (e.ctrlKey && e.key.toLowerCase() === 'j') {
+        e.preventDefault();
+        toggleConsole();
     }
 });
 
@@ -962,3 +965,17 @@ function initializeResizers() {
 document.addEventListener('DOMContentLoaded', () => {
     initializeResizers();
 });
+
+let isConsoleVisible = true;
+
+function toggleConsole() {
+    const consoleContainer = document.querySelector('.console-container');
+    isConsoleVisible = !isConsoleVisible;
+    
+    if (isConsoleVisible) {
+        consoleContainer.style.display = 'block';
+        consoleContainer.style.height = '150px';
+    } else {
+        consoleContainer.style.display = 'none';
+    }
+}
