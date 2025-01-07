@@ -11,20 +11,29 @@
             File
             <div class="dropdown" id="fileMenu">
                 <div class="dropdown-item" onclick="newFile()">
-                    <i class="material-icons">note_add</i> New (Ctrl+N)
+                    <i class="material-icons">note_add</i>
+                    New (Ctrl+N)
                 </div>
-                <div class="dropdown-item" onclick="openFile()">
-                    <i class="material-icons">insert_drive_file</i> Open (Ctrl+O)
+                <div class="dropdown-item" onclick="openFileDialog()">
+                    <i class="material-icons">insert_drive_file</i>
+                    Open File (Ctrl+O)
+                </div>
+                <div class="dropdown-item" onclick="openFolder()">
+                    <i class="material-icons">folder_open</i>
+                    Open Folder (Ctrl+Shift+O)
                 </div>
                 <div class="dropdown-item" onclick="saveFile()">
-                    <i class="material-icons">save</i> Save (Ctrl+S)
+                    <i class="material-icons">save</i>
+                    Save (Ctrl+S)
                 </div>
                 <div class="dropdown-item" onclick="saveFileAs()">
-                    <i class="material-icons">save_as</i> Save As (Ctrl+Shift+S)
+                    <i class="material-icons">save_as</i>
+                    Save As (Ctrl+Shift+S)
                 </div>
                 <div class="dropdown-divider"></div>
                 <div class="dropdown-item" onclick="runCode()">
-                    <i class="material-icons">play_arrow</i> Run (F5)
+                    <i class="material-icons">play_arrow</i>
+                    Run (F5)
                 </div>
                 <div class="dropdown-item" onclick="stopCode()">
                     <i class="material-icons">stop</i> Stop (F6)
@@ -40,8 +49,7 @@
             <div class="dropdown" id="viewMenu">
                 <div class="dropdown-item" onclick="toggleConsole()">
                     <i class="material-icons">terminal</i>
-                    Toggle Console
-                    <span class="shortcut">Ctrl+J</span>
+                    Toggle Console (Ctrl+J)
                 </div>
                 <div class="dropdown-divider"></div>
                 <div class="dropdown-item" onclick="window.electron.ipcRenderer.invoke('open-themes-folder')">
@@ -184,13 +192,32 @@
     </div>
 
     <div class="editor-container">
-        <div id="editor"></div>
-        <div class="console-container" id="consoleContainer">
-            <div class="console-header">
-                <span>Console</span>
-                <div class="resize-handle"></div>
+        <div class="file-explorer">
+            <div class="file-explorer-resize"></div>
+            <div class="file-explorer-header">
+                <div class="file-explorer-actions">
+                    <span class="file-explorer-title">EXPLORER</span>
+                    <div>
+                        <i class="material-icons" onclick="openFolder()" style="cursor: pointer;">folder_open</i>
+                        <i class="material-icons" onclick="refreshExplorer()" style="cursor: pointer;">refresh</i>
+                    </div>
+                </div>
+                <div class="current-folder" id="currentFolder"></div>
             </div>
-            <div id="console"></div>
+            <div class="file-explorer-content" id="fileExplorerContent">
+            </div>
+        </div>
+        <div class="editor-and-console">
+            <div class="tabs-container" id="tabsContainer">
+            </div>
+            <div id="editor"></div>
+            <div class="console-container" id="consoleContainer">
+                <div class="console-header">
+                    <span>Console</span>
+                    <div class="resize-handle"></div>
+                </div>
+                <div id="console"></div>
+            </div>
         </div>
     </div>
 
