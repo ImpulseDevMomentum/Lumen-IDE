@@ -7,6 +7,7 @@ const { autoUpdater } = require('electron-updater')
 
 let mainWindow
 let runningProcess = null
+let currentWorkingDirectory = null
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
@@ -127,7 +128,17 @@ app.on('window-all-closed', () => {
     }
 })
 
-ipcMain.handle('open-file', async () => {
+ipcMain.handle('open-file', async (event, filePath = null) => {
+    if (filePath) {
+        try {
+            const content = fs.readFileSync(filePath, 'utf8');
+            return { path: filePath, content };
+        } catch (error) {
+            console.error('Error reading file:', error);
+            return null;
+        }
+    }
+
     const result = await dialog.showOpenDialog(mainWindow, {
         properties: ['openFile'],
         filters: [
@@ -329,3 +340,62 @@ ipcMain.handle('open-highlights-folder', async () => {
     await shell.openPath(highlightsPath);
     return { success: true };
 });
+
+ipcMain.handle('open-folder', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+        properties: ['openDirectory']
+    });
+    
+    if (!result.canceled && result.filePaths.length > 0) {
+        currentWorkingDirectory = result.filePaths[0];
+        return await readDirectory(currentWorkingDirectory);
+    }
+    return null;
+});
+
+ipcMain.handle('get-current-folder', () => {
+    return currentWorkingDirectory;
+});
+
+ipcMain.handle('read-directory', async (event, dirPath) => {
+    return await readDirectory(dirPath);
+});
+
+async function readDirectory(dirPath) {
+    try {
+        const items = await fs.promises.readdir(dirPath, { withFileTypes: true });
+        const result = {
+            path: dirPath,
+            items: []
+        };
+        
+        const folders = items
+            .filter(item => item.isDirectory())
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        const files = items
+            .filter(item => item.isFile())
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        for (const folder of folders) {
+            result.items.push({
+                name: folder.name,
+                path: path.join(dirPath, folder.name),
+                type: 'folder'
+            });
+        }
+
+        for (const file of files) {
+            result.items.push({
+                name: file.name,
+                path: path.join(dirPath, file.name),
+                type: 'file'
+            });
+        }
+
+        return result;
+    } catch (error) {
+        console.error('Error reading directory:', error);
+        return { error: error.message };
+    }
+}
