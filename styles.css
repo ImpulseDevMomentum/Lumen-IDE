@@ -160,17 +160,23 @@ button:active {
 
 .console-container {
     position: relative;
-    background-color: #21252b;
+    background-color: var(--explorer-background, #21252b);
     border-top: 1px solid #181a1f;
+    height: 150px;
+    will-change: height;
+    transform: translateZ(0);
 }
 
 .resize-handle {
     position: absolute;
-    top: 0;
+    top: -3px;
     left: 0;
     right: 0;
-    height: 4px;
+    height: 6px;
     cursor: ns-resize;
+    background: transparent;
+    z-index: 100;
+    touch-action: none;
 }
 
 .console-header {
@@ -196,7 +202,6 @@ button:active {
     background-color: #282c34;
 }
 
-/* Scrollbar styling */
 #console::-webkit-scrollbar {
     width: 12px;
 }
