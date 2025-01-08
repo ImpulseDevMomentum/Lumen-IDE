@@ -200,6 +200,7 @@ function handleMouseMove(e) {
     
     if (newHeight >= 150 && newHeight <= window.innerHeight * 0.8) {
         consoleContainer.style.height = `${newHeight}px`;
+        lastConsoleHeight = `${newHeight}px`;
     }
 }
 
@@ -973,6 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let isConsoleVisible = true;
+let lastConsoleHeight = '150px';
 
 function toggleConsole() {
     const consoleContainer = document.querySelector('.console-container');
@@ -980,8 +982,9 @@ function toggleConsole() {
     
     if (isConsoleVisible) {
         consoleContainer.style.display = 'block';
-        consoleContainer.style.height = '150px';
+        consoleContainer.style.height = lastConsoleHeight;
     } else {
+        lastConsoleHeight = consoleContainer.style.height;
         consoleContainer.style.display = 'none';
     }
 }
