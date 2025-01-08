@@ -481,7 +481,7 @@ button:active {
 .tab {
     display: flex;
     align-items: center;
-    padding: 0 10px;
+    padding: 0 1px 0 10px;
     background-color: var(--tab-background, #2d2d2d);
     border-right: 1px solid var(--tab-border-color, #181a1f);
     min-width: 80px;
@@ -507,7 +507,7 @@ button:active {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-right: 5px;
+    flex: 1;
 }
 
 .tab.active .tab-title {
@@ -516,12 +516,26 @@ button:active {
 
 .tab-close {
     color: #abb2bf;
-    font-size: 16px;
-    padding: 2px;
-    border-radius: 4px;
+    font-size: 8px;
+    padding: 0;
+    border-radius: 2px;
     margin-left: auto;
     opacity: 0;
     transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0.6);
+    line-height: 1;
+}
+
+.tab-close i {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .tab:hover .tab-close {
