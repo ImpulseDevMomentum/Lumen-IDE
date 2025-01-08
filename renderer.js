@@ -578,6 +578,12 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         toggleConsole();
     }
+    if (e.ctrlKey && e.key.toLowerCase() === 'w') {
+        e.preventDefault();
+        if (activeTab) {
+            closeTab(activeTab.path);
+        }
+    }
 });
 
 const completions = {
