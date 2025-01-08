@@ -48,11 +48,15 @@ A modern, lightweight IDE designed specifically for the Lumen programming langua
 |--------|----------|
 | New File | Ctrl + N |
 | Open File | Ctrl + O |
+| Open Folder | Ctrl + Shift + O |
 | Save | Ctrl + S |
+| Save As | Ctrl + Shift + S |
+| Close Tab | Ctrl + W |
 | Run Code | F5 |
+| Stop Code | F6 |
 | Toggle Console | Ctrl + J |
 
-## 🤝 Contributing
+##🤝 Contributing
 We welcome contributions! Feel free to report bugs, suggest features, or submit pull requests.
 
 ## 📄 License
