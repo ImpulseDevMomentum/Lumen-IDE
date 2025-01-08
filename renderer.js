@@ -367,7 +367,7 @@ function switchTab(tab) {
 
 function renderTabs() {
     const container = document.getElementById('tabsContainer');
-    container.innerHTML = '';
+    const fragment = document.createDocumentFragment();
 
     openTabs.forEach(tab => {
         const tabElement = document.createElement('div');
@@ -378,10 +378,16 @@ function renderTabs() {
         `;
         
         tabElement.onclick = () => switchTab(tab);
-        tabElement.querySelector('.tab-close').onclick = (e) => closeTab(tab.path, e);
+        tabElement.querySelector('.tab-close').onclick = (e) => {
+            e.stopPropagation();
+            closeTab(tab.path, e);
+        };
         
-        container.appendChild(tabElement);
+        fragment.appendChild(tabElement);
     });
+
+    container.innerHTML = '';
+    container.appendChild(fragment);
 }
 
 async function openFile(filePath) {
@@ -472,23 +478,31 @@ document.addEventListener('click', (e) => {
     }
 });
 
-const ansiToHtml = (text) => {
-    text = text.replace(/&/g, '&amp;')
-               .replace(/</g, '&lt;')
-               .replace(/>/g, '&gt;');
-
+const ansiToHtml = (() => {
+    const cache = new Map();
     const ansiColorMap = {
-        '\u001b[31m': '<span class="ansi-red">',      // Czerwony (red)
-        '\u001b[33m': '<span class="ansi-yellow">',    // Żółty (yellow)
-        '\u001b[0m': '</span>',                        // Reset (reset)
+        '\u001b[31m': '<span class="ansi-red">',
+        '\u001b[33m': '<span class="ansi-yellow">',
+        '\u001b[0m': '</span>',
     };
 
-    let html = text;
-    for (const [ansi, htmlTag] of Object.entries(ansiColorMap)) {
-        html = html.replace(new RegExp(ansi.replace('[', '\\['), 'g'), htmlTag);
-    }
-    return html;
-};
+    return (text) => {
+        if (cache.has(text)) return cache.get(text);
+        
+        text = text.replace(/&/g, '&amp;')
+                   .replace(/</g, '&lt;')
+                   .replace(/>/g, '&gt;');
+
+        let html = text;
+        for (const [ansi, htmlTag] of Object.entries(ansiColorMap)) {
+            html = html.replace(new RegExp(ansi.replace('[', '\\['), 'g'), htmlTag);
+        }
+        
+        if (cache.size > 1000) cache.clear();
+        cache.set(text, html);
+        return html;
+    };
+})();
 
 async function runCode() {
     try {
@@ -526,8 +540,17 @@ async function stopCode() {
 window.electron.ipcRenderer.on('console-output', (text) => {
     try {
         const html = ansiToHtml(text);
+        if (console.childNodes.length > 1000) {
+            console.innerHTML = console.innerHTML.split('\n').slice(-500).join('\n');
+        }
         console.innerHTML += html;
-        console.scrollTop = console.scrollHeight;
+        
+        if (!console.scrollTimeout) {
+            console.scrollTimeout = setTimeout(() => {
+                console.scrollTop = console.scrollHeight;
+                console.scrollTimeout = null;
+            }, 16);
+        }
 
         if (text.includes('input> ') || text.includes('input_int> ')) {
             const consoleInput = document.querySelector('.console-input');
@@ -964,7 +987,9 @@ function initializeResizers() {
         
         const newWidth = startWidth + (e.clientX - startX);
         if (newWidth >= 200 && newWidth <= 400) {
-            fileExplorer.style.width = `${newWidth}px`;
+            requestAnimationFrame(() => {
+                fileExplorer.style.width = `${newWidth}px`;
+            });
         }
     }
 }
